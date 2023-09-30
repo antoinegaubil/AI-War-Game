@@ -324,15 +324,45 @@ class Game:
             target.mod_health(health_delta)
             self.remove_dead(coord)
 
-    def is_valid_move(self, coords: CoordPair) -> bool:
-        """Validate a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
+        def is_valid_move(self, coords: CoordPair) -> bool:
+        """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst):
             return False
-        unit = self.get(coords.src)
-        if unit is None or unit.player != self.next_player:
+
+        """Get the source unit"""
+        src_unit = self.get(coords.src)
+
+        """Check if the source unit exists and is of a valid player"""
+        if src_unit is None or src_unit.player != self.next_player:
             return False
-        unit = self.get(coords.dst)
-        return (unit is None)
+
+        """Get the destination unit"""
+        dst_unit = self.get(coords.dst)
+
+        """Calculate the row and column differences between source and destination coordinates"""
+        row_diff = coords.dst.row - coords.src.row
+        col_diff = coords.dst.col - coords.src.col
+
+        """Add movement restrictions based on player type and unit type"""
+        if src_unit.player == Player.Attacker:
+            if src_unit.type in [UnitType.Firewall, UnitType.Program, UnitType.AI]:
+                """Attacker's Firewall, Program, and AI can only move up or left"""
+                if row_diff > 0 or col_diff > 0:
+                    return False
+        elif src_unit.player == Player.Defender:
+            if src_unit.type in [UnitType.Firewall, UnitType.Program, UnitType.AI]:
+                """Defender's Firewall, Program, and AI can only move down or right"""
+                if row_diff < 0 or col_diff < 0:
+                    return False
+
+        """Check if any opponent units are adjacent to the player unit"""
+        for adj_coord in coords.src.iter_adjacent():
+            adj_unit = self.get(adj_coord)
+            if adj_unit is not None and adj_unit.player != src_unit.player:
+                return False
+
+        """Check if the destination cell is empty or contains an opponent's unit"""
+        return dst_unit is None or dst_unit.player != self.next_player
 
     def perform_move(self, coords: CoordPair) -> Tuple[bool, str]:
         """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
