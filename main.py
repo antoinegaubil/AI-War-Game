@@ -325,6 +325,7 @@ class Game:
             self.remove_dead(coord)
 
     def is_valid_move(self, coords: CoordPair) -> bool:
+
         """Validate a move expressed as a CoordPair."""
         if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst):
             return False
@@ -342,6 +343,10 @@ class Game:
         """Calculate the row and column differences between source and destination coordinates"""
         row_diff = coords.dst.row - coords.src.row
         col_diff = coords.dst.col - coords.src.col
+
+        """Ensure that no diagonal movements are allowed"""
+        if row_diff != 0 and col_diff != 0:
+            return False
 
         """Add movement restrictions based on player type and unit type"""
         if src_unit.player == Player.Attacker:
