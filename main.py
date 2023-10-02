@@ -696,7 +696,7 @@ def main():
                 else:
                     print(result)
 
-                    if action == "self-destruct":
+            elif action == "self-destruct":
                         coords = game.read_move()
                         success, result = game.self_destruct(coords)
                         if success:
