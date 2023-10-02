@@ -324,6 +324,15 @@ class Game:
             target.mod_health(health_delta)
             self.remove_dead(coord)
 
+    def combat(self, coords: CoordPair, unit: Unit, targetUnit: Unit) -> bool:
+        self.mod_health(coords.src, -abs(targetUnit.damage_amount(unit)))
+        self.mod_health(coords.dst, -abs(unit.damage_amount(targetUnit)))
+        print(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}')
+        print(f'{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}')
+        if targetUnit.health <= 0:
+            return True
+        return False
+
     def is_valid_move(self, coords: CoordPair) -> bool:
 
         """Validate a move expressed as a CoordPair."""
@@ -364,17 +373,27 @@ class Game:
         for adj_coord in coords.src.iter_adjacent():
             adj_unit = self.get(adj_coord)
             if adj_unit is not None and adj_unit.player != src_unit.player:
-                return False
+                if dst_unit is not None and dst_unit.player != self.next_player:
+                    movePiece = self.combat(coords, self.get(coords.src), self.get(coords.dst))
+                    if movePiece:
+                        return True
+                    return 'Damage'
 
         """Check if the destination cell is empty or contains an opponent's unit"""
         return dst_unit is None or dst_unit.player != self.next_player
 
     def perform_move(self, coords: CoordPair) -> Tuple[bool, str]:
-        """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
-        if self.is_valid_move(coords):
+        """Validate and perform a move expressed as a CoordPair."""
+        result = self.is_valid_move(coords)
+        print(result)
+        if result is True:  # Check if the result is explicitly True
+            print('IN TRUE')
             self.set(coords.dst, self.get(coords.src))
             self.set(coords.src, None)
             return (True, "")
+        elif result == "Damage":  # Check if the result is "damage"
+            print("Damage occurred")
+            return (True, "Damage")
         return (False, "invalid move")
 
     def next_turn(self):
