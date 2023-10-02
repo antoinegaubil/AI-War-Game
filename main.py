@@ -22,7 +22,7 @@ class UnitType(Enum):
     Program = 3
     Firewall = 4
     Repair = 5
-
+    SelfDestruct = 5
 class Player(Enum):
     """The 2 players."""
     Attacker = 0
@@ -58,6 +58,7 @@ class Unit:
         [9, 6, 1, 6, 1],  # Virus
         [3, 3, 3, 3, 1],  # Program
         [1, 1, 1, 1, 1],  # Firewall
+        [1, 1, 1, 1, 1],  # SelfDestruct
     ]
     # class variable: repair table for units (based on the unit type constants in order)
     repair_table: ClassVar[list[list[int]]] = [
@@ -111,6 +112,7 @@ class Unit:
         if target.health + amount > 9:
             return 9 - target.health
         return amount
+
 
 
 ##############################################################################################################
@@ -613,6 +615,30 @@ class Game:
 
         return (True, f"Repaired units: {coords.src} -> {coords.dst}")
 
+    def self_destruct(self, coord: Coord) -> Tuple[bool, str]:
+        """Perform a self-destruct action at the specified Coord."""
+        unit = self.get(coord)
+
+        if unit is None:
+            return (False, "No unit at the specified Coord.")
+
+        if unit.type != UnitType.SelfDestruct:
+            return (False, "Unit at the specified Coord cannot self-destruct.")
+
+        # Damage surrounding units (including diagonals and friendly units)
+        for adj_coord in coord.iter_range(1):
+            target_unit = self.get(adj_coord)
+            if target_unit is not None:
+                # Inflict 2 points of damage to the target unit
+                damage_amount = 2
+                target_unit.mod_health(-damage_amount)
+                self.remove_dead(adj_coord)
+
+        # Remove the self-destruct unit from the board
+        self.set(coord, None)
+
+        return (True, f"Self-destructed at {coord} and damaged surrounding units.")
+
 ##############################################################################################################
 
 
@@ -661,9 +687,9 @@ def main():
             break
         if game.options.game_type == GameType.AttackerVsDefender:
             action = input("Enter your action (move/attack/repair/self-destruct): ")
-            if action == "repair":
+            if action == "self-destruct":
                 coords = game.read_move()
-                success, result = game.perform_repair(coords)
+                success, result = game.self_destruct(coords)
                 if success:
                     print(f"Player {game.next_player.name}: {result}")
                     game.next_turn()
