@@ -687,14 +687,24 @@ def main():
             break
         if game.options.game_type == GameType.AttackerVsDefender:
             action = input("Enter your action (move/attack/repair/self-destruct): ")
-            if action == "self-destruct":
+            if action == "repair":
                 coords = game.read_move()
-                success, result = game.self_destruct(coords)
+                success, result = game.perform_repair(coords)
                 if success:
                     print(f"Player {game.next_player.name}: {result}")
                     game.next_turn()
                 else:
                     print(result)
+
+                    if action == "self-destruct":
+                        coords = game.read_move()
+                        success, result = game.self_destruct(coords)
+                        if success:
+                            print(f"Player {game.next_player.name}: {result}")
+                            game.next_turn()
+                        else:
+                            print(result)
+
             else:
                 game.human_turn()
 
