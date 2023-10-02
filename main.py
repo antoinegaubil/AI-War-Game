@@ -22,6 +22,8 @@ class UnitType(Enum):
     Program = 3
     Firewall = 4
     Repair = 5
+    SelfDestruct = 5
+
 
 class Player(Enum):
     """The 2 players."""
@@ -58,6 +60,7 @@ class Unit:
         [9, 6, 1, 6, 1],  # Virus
         [3, 3, 3, 3, 1],  # Program
         [1, 1, 1, 1, 1],  # Firewall
+        [1, 1, 1, 1, 1],  # SelfDestruct
     ]
     # class variable: repair table for units (based on the unit type constants in order)
     repair_table: ClassVar[list[list[int]]] = [
@@ -67,14 +70,6 @@ class Unit:
         [0, 0, 0, 0, 0],  # Program
         [0, 0, 0, 0, 0],  # Firewall
     ]
-
-    def repair_amount(self, target: Unit) -> int:
-        """How much can this unit repair another unit."""
-        amount = self.repair_table[self.type.value][target.type.value]
-        if target.health + amount > 9:
-            return 9 - target.health
-        return amount
-
 
     def is_alive(self) -> bool:
         """Are we alive ?"""
@@ -325,12 +320,62 @@ class Game:
                 else:
                     self._defender_has_ai = False
 
+    def perform_repair(self, coords: CoordPair) -> Tuple[bool, str]:
+        """Validate and perform a repair action expressed as a CoordPair."""
+        src_unit = self.get(coords.src)
+        dst_unit = self.get(coords.dst)
+        if src_unit is None or dst_unit is None:
+            return (False, "Invalid units for repair")
+        if src_unit.player != self.next_player or dst_unit.player != self.next_player:
+            return (False, "Cannot repair enemy units")
+        if not src_unit.type == UnitType.Repair:
+            return (False, "Invalid repair source unit")
+        if src_unit.health >= 9:
+            return (False, "Source unit's health is already full")
+        # Calculate the repair amount
+        repair_amount = src_unit.repair_amount(dst_unit)
+        # Apply repair
+        src_unit.mod_health(repair_amount)
+        dst_unit.mod_health(repair_amount)
+        return (True, f"Repaired units: {coords.src} -> {coords.dst}")
+
+    def self_destruct(self, coord: Coord) -> Tuple[bool, str]:
+        """Perform a self-destruct action at the specified Coord."""
+        unit = self.get(coord)
+        if unit is None:
+            return (False, "No unit at the specified Coord.")
+        if unit.type != UnitType.SelfDestruct:
+            return (False, "Unit at the specified Coord cannot self-destruct.")
+        # Damage surrounding units (including diagonals and friendly units)
+        for adj_coord in coord.iter_range(1):
+            target_unit = self.get(adj_coord)
+            if target_unit is not None:
+                # Inflict 2 points of damage to the target unit
+                damage_amount = 2
+                target_unit.mod_health(-damage_amount)
+                self.remove_dead(adj_coord)
+        # Remove the self-destruct unit from the board
+        self.set(coord, None)
+        return (True, f"Self-destructed at {coord} and damaged surrounding units.")
+
     def mod_health(self, coord: Coord, health_delta: int):
         """Modify health of unit at Coord (positive or negative delta)."""
         target = self.get(coord)
         if target is not None:
             target.mod_health(health_delta)
             self.remove_dead(coord)
+
+    def combat(self, coords: CoordPair, unit: Unit, targetUnit: Unit) -> bool:
+        self.mod_health(coords.src, -abs(targetUnit.damage_amount(unit)))
+        self.mod_health(coords.dst, -abs(unit.damage_amount(targetUnit)))
+        f = open('log.txt', "a")
+        f.write(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n {targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
+        f.close()
+        print(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}')
+        print(f'{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}')
+        if targetUnit.health <= 0:
+            return True
+        return False
 
     def is_valid_move(self, coords: CoordPair) -> bool:
 
@@ -372,17 +417,28 @@ class Game:
         for adj_coord in coords.src.iter_adjacent():
             adj_unit = self.get(adj_coord)
             if adj_unit is not None and adj_unit.player != src_unit.player:
-                return False
+                if dst_unit is not None and dst_unit.player != self.next_player:
+                    movePiece = self.combat(coords, self.get(coords.src), self.get(coords.dst))
+                    if movePiece:
+                        return True
+                    return 'Damage'
 
         """Check if the destination cell is empty or contains an opponent's unit"""
         return dst_unit is None or dst_unit.player != self.next_player
 
     def perform_move(self, coords: CoordPair) -> Tuple[bool, str]:
-        """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
-        if self.is_valid_move(coords):
+        """Validate and perform a move expressed as a CoordPair."""
+        result = self.is_valid_move(coords)
+        print(result)
+        if result is True:
             self.set(coords.dst, self.get(coords.src))
             self.set(coords.src, None)
             return (True, "")
+        elif result == "Damage":
+            return (True, "Damage")
+        f = open('log.txt', "a")
+        f.write('An Invalid Move Has Been Entered\n')
+        f.close()
         return (False, "invalid move")
 
     def next_turn(self):
@@ -432,6 +488,9 @@ class Game:
         """Read a move from keyboard and return as a CoordPair."""
         while True:
             s = input(F'Player {self.next_player.name}, enter your move: ')
+            f = open('log.txt', "a")
+            f.write(F'{self.next_player.name}\'s move : {s} \n')
+            f.close()
             coords = CoordPair.from_string(s)
             if coords is not None and self.is_valid_coord(coords.src) and self.is_valid_coord(coords.dst):
                 return coords
@@ -489,13 +548,22 @@ class Game:
     def has_winner(self) -> Player | None:
         """Check if the game is over and returns winner"""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
+            f = open('log.txt', "a")
+            f.write('DEFENDER WINS!.\n')
+            f.close()
             return Player.Defender
         elif self._attacker_has_ai:
             if self._defender_has_ai:
                 return None
             else:
+                f = open('log.txt', "a")
+                f.write('ATTACKER WINS.\n')
+                f.close()
                 return Player.Attacker
         elif self._defender_has_ai:
+            f = open('log.txt', "a")
+            f.write('DEFENDER WINS!.\n')
+            f.close()
             return Player.Defender
 
     def move_candidates(self) -> Iterable[CoordPair]:
@@ -525,9 +593,6 @@ class Game:
         (score, move, avg_depth) = self.random_move()
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
-        print(f"Heuristic score: {score}")
-        print(f"Average recursive depth: {avg_depth:0.1f}")
-        print(f"Evals per depth: ", end='')
         for k in sorted(self.stats.evaluations_per_depth.keys()):
             print(f"{k}:{self.stats.evaluations_per_depth[k]} ", end='')
         print()
@@ -586,38 +651,16 @@ class Game:
             print(f"Broker error: {error}")
         return None
 
-    def perform_repair(self, coords: CoordPair) -> Tuple[bool, str]:
-        """Validate and perform a repair action expressed as a CoordPair."""
-        src_unit = self.get(coords.src)
-        dst_unit = self.get(coords.dst)
-
-        if src_unit is None or dst_unit is None:
-            return (False, "Invalid units for repair")
-
-        if src_unit.player != self.next_player or dst_unit.player != self.next_player:
-            return (False, "Cannot repair enemy units")
-
-        if not src_unit.type == UnitType.Repair:
-            return (False, "Invalid repair source unit")
-
-        if src_unit.health >= 9:
-            return (False, "Source unit's health is already full")
-
-
-# Calculate the repair amount
-        repair_amount = src_unit.repair_amount(dst_unit)
-
-        # Apply repair
-        src_unit.mod_health(repair_amount)
-        dst_unit.mod_health(repair_amount)
-
-        return (True, f"Repaired units: {coords.src} -> {coords.dst}")
 
 ##############################################################################################################
 
 
 def main():
-    # parse command line arguments
+    # If you want to append data to an existing file, use 'a' mode
+    f = open('log.txt', "a")
+    f.write('START OF THE LOG!.\n')
+    f.close()
+    # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -627,7 +670,7 @@ def main():
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
 
-    # parse the game type
+    # Parse the game type
     if args.game_type == "attacker":
         game_type = GameType.AttackerVsComp
     elif args.game_type == "defender":
@@ -637,10 +680,10 @@ def main():
     else:
         game_type = GameType.CompVsComp
 
-    # set up game options
+    # Set up game options
     options = Options(game_type=game_type)
 
-    # override class defaults via command line options
+    # Override class defaults via command line options
     if args.max_depth is not None:
         options.max_depth = args.max_depth
     if args.max_time is not None:
@@ -648,10 +691,10 @@ def main():
     if args.broker is not None:
         options.broker = args.broker
 
-    # create a new game
+    # Create a new game
     game = Game(options=options)
 
-    # the main game loop
+    # The main game loop
     while True:
         print()
         print(game)
@@ -659,21 +702,34 @@ def main():
         if winner is not None:
             print(f"{winner.name} wins!")
             break
+
         if game.options.game_type == GameType.AttackerVsDefender:
-            action = input("Enter your action (move/attack/repair/self-destruct): ")
+            action = input(f'{game.next_player.name} Enter your action (play/repair/self-destruct):')
             if action == "repair":
                 coords = game.read_move()
                 success, result = game.perform_repair(coords)
                 if success:
                     print(f"Player {game.next_player.name}: {result}")
-                    game.next_turn()
-                else:
-                    print(result)
+            elif action == "self-destruct":
+                coords = game.read_move()
+                success, result = game.self_destruct(coords.src)
+                if success:
+                    game.human_turn()
+                    print(f"Player {game.next_player.name}: {result}")
+            game.human_turn()
+        elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
+            game.human_turn()
+        elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender:
+            game.human_turn()
+        else:
+            player = game.next_player
+            move = game.computer_turn()
+            if move is not None:
+                game.post_move_to_broker(move)
             else:
-                game.human_turn()
+                print("Computer doesn't know what to do!!!")
+                exit(1)
 
-##############################################################################################################
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

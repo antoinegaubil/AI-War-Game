@@ -1,0 +1,71 @@
+START OF THE LOG!.
+START OF THE LOG!.
+Attacker's move : c4c3Defender's move : c0c1Attacker's move : c3c2START OF THE LOG!.
+Attacker's move : c4c3 
+Defender's move : c0c1 
+Attacker's move : c3c2 
+Defender's move : c1c2 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Attacker's move : c2c1 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+START OF THE LOG!.
+Attacker's move : c4c3 
+START OF THE LOG!.
+Attacker's move : c4c3 
+An Invalid Move Has Been Entered
+Defender's move : c0c1 
+Attacker's move : c3c2 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+An Invalid Move Has Been Entered
+START OF THE LOG!.
+Attacker's move : c4c3 
+An Invalid Move Has Been Entered
+Defender's move : c0c1 
+Attacker's move : c3c2 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+START OF THE LOG!.
+Attacker's move : c4c3 
+Attacker's move : c0c1 
+An Invalid Move Has Been Entered
+START OF THE LOG!.
+Attacker's move : c4c3 
+Attacker's move : c0c1 
+An Invalid Move Has Been Entered
+START OF THE LOG!.
+Attacker's move : c4c3 
+Defender's move : c0c1 
+Attacker's move : c3c2 
+Defender's move : c1c2 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+START OF THE LOG!.
+Attacker's move : c4c3 
+Defender's move : c0c1 
+Attacker's move : c3c2 
+Defender's move : c1c2 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+START OF THE LOG!.
+Attacker's move : c4c3 
+START OF THE LOG!.
+Attacker's move : c4c3 
+Defender's move : c0c1 
+Attacker's move : c3c2 
+Defender's move : c1c2 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Attacker's move : c2c1 
+START OF THE LOG!.
+Attacker's move : c4b4 
+START OF THE LOG!.
+Attacker's move : c4c3 
+Attacker's move : c4c3 
+START OF THE LOG!.
+Attacker's move : c4c3 
+Defender's move : c0 
+Defender's move : c0c1 
+Defender's move : c0c1 
