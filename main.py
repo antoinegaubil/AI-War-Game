@@ -23,8 +23,6 @@ class UnitType(Enum):
     Firewall = 4
     Repair = 5
     SelfDestruct = 5
-
-
 class Player(Enum):
     """The 2 players."""
     Attacker = 0
@@ -106,6 +104,7 @@ class Unit:
         if target.health + amount > 9:
             return 9 - target.health
         return amount
+
 
 
 ##############################################################################################################
@@ -651,6 +650,30 @@ class Game:
             print(f"Broker error: {error}")
         return None
 
+
+    def self_destruct(self, coord: Coord) -> Tuple[bool, str]:
+        """Perform a self-destruct action at the specified Coord."""
+        unit = self.get(coord)
+
+        if unit is None:
+            return (False, "No unit at the specified Coord.")
+
+        if unit.type != UnitType.SelfDestruct:
+            return (False, "Unit at the specified Coord cannot self-destruct.")
+
+        # Damage surrounding units (including diagonals and friendly units)
+        for adj_coord in coord.iter_range(1):
+            target_unit = self.get(adj_coord)
+            if target_unit is not None:
+                # Inflict 2 points of damage to the target unit
+                damage_amount = 2
+                target_unit.mod_health(-damage_amount)
+                self.remove_dead(adj_coord)
+
+        # Remove the self-destruct unit from the board
+        self.set(coord, None)
+
+        return (True, f"Self-destructed at {coord} and damaged surrounding units.")
 
 ##############################################################################################################
 
