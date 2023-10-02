@@ -21,7 +21,7 @@ class UnitType(Enum):
     Virus = 2
     Program = 3
     Firewall = 4
-
+    Repair = 5
 
 class Player(Enum):
     """The 2 players."""
@@ -67,6 +67,14 @@ class Unit:
         [0, 0, 0, 0, 0],  # Program
         [0, 0, 0, 0, 0],  # Firewall
     ]
+
+    def repair_amount(self, target: Unit) -> int:
+        """How much can this unit repair another unit."""
+        amount = self.repair_table[self.type.value][target.type.value]
+        if target.health + amount > 9:
+            return 9 - target.health
+        return amount
+
 
     def is_alive(self) -> bool:
         """Are we alive ?"""
@@ -578,6 +586,32 @@ class Game:
             print(f"Broker error: {error}")
         return None
 
+    def perform_repair(self, coords: CoordPair) -> Tuple[bool, str]:
+        """Validate and perform a repair action expressed as a CoordPair."""
+        src_unit = self.get(coords.src)
+        dst_unit = self.get(coords.dst)
+
+        if src_unit is None or dst_unit is None:
+            return (False, "Invalid units for repair")
+
+        if src_unit.player != self.next_player or dst_unit.player != self.next_player:
+            return (False, "Cannot repair enemy units")
+
+        if not src_unit.type == UnitType.Repair:
+            return (False, "Invalid repair source unit")
+
+        if src_unit.health >= 9:
+            return (False, "Source unit's health is already full")
+
+
+# Calculate the repair amount
+        repair_amount = src_unit.repair_amount(dst_unit)
+
+        # Apply repair
+        src_unit.mod_health(repair_amount)
+        dst_unit.mod_health(repair_amount)
+
+        return (True, f"Repaired units: {coords.src} -> {coords.dst}")
 
 ##############################################################################################################
 
@@ -626,20 +660,17 @@ def main():
             print(f"{winner.name} wins!")
             break
         if game.options.game_type == GameType.AttackerVsDefender:
-            game.human_turn()
-        elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
-            game.human_turn()
-        elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender:
-            game.human_turn()
-        else:
-            player = game.next_player
-            move = game.computer_turn()
-            if move is not None:
-                game.post_move_to_broker(move)
+            action = input("Enter your action (move/attack/repair/self-destruct): ")
+            if action == "repair":
+                coords = game.read_move()
+                success, result = game.perform_repair(coords)
+                if success:
+                    print(f"Player {game.next_player.name}: {result}")
+                    game.next_turn()
+                else:
+                    print(result)
             else:
-                print("Computer doesn't know what to do!!!")
-                exit(1)
-
+                game.human_turn()
 
 ##############################################################################################################
 
