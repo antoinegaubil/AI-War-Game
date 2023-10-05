@@ -69,3 +69,110 @@ Attacker's move : c4c3
 Defender's move : c0 
 Defender's move : c0c1 
 Defender's move : c0c1 
+START OF THE LOG!.
+Attacker's move : c4c3 
+Defender's move : c0c1 
+Attacker's move : c3c2 
+Defender's move : c1c2 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Attacker's move : c2c1 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+Defender's move : c1c2 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Attacker's move : c2c1 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+Defender's move : c2c1 
+An Invalid Move Has Been Entered
+Defender's move : c1c2 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Attacker's move : c2c3 
+START OF THE LOG!.
+Attacker's move : D3 C3 
+Defender's move : B1 C1 
+Attacker's move : C3 B3 
+Defender's move : C1 C2 
+Attacker's move : B3 B@ 
+Attacker's move : B3 B2 
+Defender's move : C2 B2 
+An Invalid Move Has Been Entered
+START OF THE LOG!.
+Attacker's move : D3 C3 
+Defender's move : B1 C1 
+Attacker's move : C3 B3 
+Defender's move : C1 C2 
+Attacker's move : B3 B2 
+Defender's move : c2b2 
+An Invalid Move Has Been Entered
+START OF THE LOG!.
+Attacker's move : d3c3 
+Defender's move : b1c1 
+Attacker's move : c3b3 
+Defender's move : c1c2 
+Attacker's move : b3b2 
+Defender's move : c2b2 
+Defender DAMAGE Program TO Firewall: -1
+ Attacker DAMAGE Firewall TO Program: -1
+Attacker's move : b2c2 
+Attacker DAMAGE Firewall TO Program: -1
+ Defender DAMAGE Program TO Firewall: -1
+Defender's move : c2d2 
+Attacker's move : b2b3 
+An Invalid Move Has Been Entered
+Attacker's move : b2a2 
+Attacker DAMAGE Firewall TO Firewall: -1
+ Defender DAMAGE Firewall TO Firewall: -1
+Defender's move : d2d3 
+START OF THE LOG!.
+Attacker's move : d3d2 
+Defender's move : b1c1 
+Attacker's move : d2c2 
+Defender's move : c1d1 
+START OF THE LOG!.
+Attacker's move : d3c3 
+Defender's move : b1c1 
+Attacker's move : c3c2 
+Defender's move : c1c2 
+Defender DAMAGE Program TO Firewall: -1
+ Attacker DAMAGE Firewall TO Program: -1
+Attacker's move : c2b2 
+An Invalid Move Has Been Entered
+Attacker's move : c2c1 
+Attacker DAMAGE Firewall TO Program: -1
+ Defender DAMAGE Program TO Firewall: -1
+Defender's move : c1d1 
+An Invalid Move Has Been Entered
+START OF THE LOG!.
+Attacker's move : d3c3 
+Defender's move : b1c1 
+Attacker's move : c3c2 
+Defender's move : c1d1 
+START OF THE LOG!.
+Attacker's move : d3c3 
+Defender's move : b1c1 
+Attacker's move : c3c2 
+Defender's move : c1c2 
+Defender DAMAGE Program TO Firewall: -1
+ Attacker DAMAGE Firewall TO Program: -1
+Attacker's move : c2c1 
+Attacker DAMAGE Firewall TO Program: -1
+ Defender DAMAGE Program TO Firewall: -1
+Defender's move : c1d1 
+START OF THE LOG!.
+Attacker's move : d3c3 
+Defender's move : b1c1 
+Attacker's move : c3c2 
+Defender's move : c1d1 
+An Invalid Move Has Been Entered
+Defender's move : c1c2 
+Defender DAMAGE Program TO Firewall: -1
+ Attacker DAMAGE Firewall TO Program: -1
+Attacker's move : c2c1 
+Attacker DAMAGE Firewall TO Program: -1
+ Defender DAMAGE Program TO Firewall: -1
+Defender's move : c1d1 
+An Invalid Move Has Been Entered

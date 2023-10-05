@@ -405,12 +405,14 @@ class Game:
             if src_unit.type in [UnitType.Firewall, UnitType.Program, UnitType.AI]:
                 """Attacker's Firewall, Program, and AI can only move up or left"""
                 if row_diff > 0 or col_diff > 0:
-                    return False
+                    if dst_unit is None:
+                        return False
         elif src_unit.player == Player.Defender:
             if src_unit.type in [UnitType.Firewall, UnitType.Program, UnitType.AI]:
                 """Defender's Firewall, Program, and AI can only move down or right"""
                 if row_diff < 0 or col_diff < 0:
-                    return False
+                    if dst_unit is None:
+                        return False
 
         """Check if any opponent units are adjacent to the player unit"""
         for adj_coord in coords.src.iter_adjacent():
@@ -421,6 +423,7 @@ class Game:
                     if movePiece:
                         return True
                     return 'Damage'
+                return False
 
         """Check if the destination cell is empty or contains an opponent's unit"""
         return dst_unit is None or dst_unit.player != self.next_player
