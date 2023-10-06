@@ -176,3 +176,352 @@ Attacker DAMAGE Firewall TO Program: -1
  Defender DAMAGE Program TO Firewall: -1
 Defender's move : c1d1 
 An Invalid Move Has Been Entered
+START OF THE GAME!.
+${game}Attacker's move : d3c3 
+${game}Defender's move : c0c1 
+${game}START OF THE GAME!.
+Attacker's move : C4C3 
+START OF THE GAME!.
+Attacker's move : C4C4 
+An Invalid Move Has Been Entered
+START OF THE GAME!.
+Attacker's move : e2e2 
+An Invalid Move Has Been Entered
+Attacker's move : c4b4 
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : c2c2 
+Damage!
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : e2e1 
+Damage!
+Defender's move : c0c1 
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : a0a0 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e4e4 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e4e4 
+Self-Destruct has been performed
+Defender's move : a0a0 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e4e4 
+Damage!
+Attacker's move : e3e3 
+Self-Destruct has been performed
+Defender's move : c0c1 
+Attacker's move : c4c3 
+Defender's move : c1c2 
+Attacker's move : c3c2 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+Combat has started
+Defender's move : c2c3 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Combat has started
+Attacker's move : c3c2 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+Combat has started
+Defender's move : c2c3 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Combat has started
+Attacker's move : c3c2 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+Combat has started
+Defender's move : c2c3 
+Defender DAMAGE Firewall TO Program: -1
+ Attacker DAMAGE Program TO Firewall: -1
+Combat has started
+Attacker's move : c3b3 
+Damage!
+Attacker's move : c2c3 
+Damage!
+Attacker's move : c3c2 
+Attacker DAMAGE Program TO Firewall: -1
+ Defender DAMAGE Firewall TO Program: -1
+Combat has started
+Defender's move : c2c2 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e4e4 
+Damage!
+Attacker's move : e3e3 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e3e3 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e3e3 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e3e3 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e3e3 
+Self-Destruct has been performed
+Defender's move : a0a0 
+Damage!
+Defender's move : b0b0 
+Self-Destruct has been performed
+Attacker's move : d3d4 
+Damage!
+START OF THE GAME!.
+Attacker's move : d3c2 
+START OF THE GAME!.
+Attacker's move : c3c3 
+Damage!
+Attacker's move : e3e3 
+Self-Destruct has been performed
+Defender's move : c0d1 
+START OF THE GAME!.
+Attacker's move : d3c2 
+Defender's move : c0d1 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2d2 
+Defender's move : c0d1 
+Damage!
+Defender's move : c0c1 
+Attacker's move : d2c1 
+Damage!
+Attacker's move : d2d3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e3e3 
+Self-Destruct has been performed
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Damage!
+Attacker's move : e2e1 
+Defender's move : b0b1 
+Damage!
+START OF THE GAME!.
+Attacker's move : e2e3 
+Repair has been performed
+Defender's move : c0c1 
+Attacker's move : d3d2 
+Defender's move : c1d1 
+Attacker's move : d2d1 
+Attacker DAMAGE Firewall TO Firewall: -1
+ Defender DAMAGE Firewall TO Firewall: -1
+Combat has started
+Defender's move : d1d2 
+Defender DAMAGE Firewall TO Firewall: -1
+ Attacker DAMAGE Firewall TO Firewall: -1
+Combat has started
+Attacker's move : e2d2 
+Repair has been performed
+Defender's move : d1d2 
+Defender DAMAGE Firewall TO Firewall: -1
+ Attacker DAMAGE Firewall TO Firewall: -1
+Combat has started
+Attacker's move : e3d2 
+Attacker's move : d2d1 
+Attacker DAMAGE Firewall TO Firewall: -1
+ Defender DAMAGE Firewall TO Firewall: -1
+Combat has started
+Defender's move : b0c0 
+Attacker's move : d2d1 
+Attacker DAMAGE Firewall TO Firewall: -1
+ Defender DAMAGE Firewall TO Firewall: -1
+Combat has started
+Defender's move : c0d1 
+Defender's move : c0c1 
+Attacker's move : d2d1 
+Attacker DAMAGE Firewall TO Firewall: -1
+ Defender DAMAGE Firewall TO Firewall: -1
+Combat has started
+Defender's move : c1d1 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : c0c1 
+Attacker's move : e2d2 
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : d2d2 
+Self-Destruct has been performed
+Defender's move : b0c0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : d3d3 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b0c0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : c4c4 
+Self-Destruct has been performed
+Defender's move : b0c0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : c4c4 
+Self-Destruct has been performed
+Defender's move : b0c0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2e 
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : c4c4 
+Self-Destruct has been performed
+Defender's move : b0c0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : c4c4 
+Self-Destruct has been performed
+Defender's move : b0c0 
+Repair has been performed
+Attacker's move : e3d3 
+Repair has been performed
+Defender's move : b0a0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+Attacker's move : e4e4 
+Attacker's move : d4d4 
+Self-Destruct has been performed
+Defender's move : b0a0 
+Repair has been performed
+Attacker's move : c4c4 
+Self-Destruct has been performed
+Defender's move : b0c0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3d3 
+Attacker's move : d3d3 
+Self-Destruct has been performed
+Defender's move : b0a0 
+Repair has been performed
+START OF THE GAME!.
+Attacker's move : e2e3 
+START OF THE GAME!.
+Attacker's move : e2e3 
+Unit's health is already fullAttacker's move : e2e2 
+Self-Destruct has been performed
+Defender's move : b1b1 
+Self-Destruct has been performed
+Attacker's move : e3e4 
+Unit's health is already fullAttacker's move : e3e3 
+Self-Destruct has been performed
+Defender's move : b0c0 
+dT7 repaired dF9 for 2Repair has been performed

@@ -23,6 +23,8 @@ class UnitType(Enum):
     Firewall = 4
     Repair = 5
     SelfDestruct = 5
+
+
 class Player(Enum):
     """The 2 players."""
     Attacker = 0
@@ -104,7 +106,6 @@ class Unit:
         if target.health + amount > 9:
             return 9 - target.health
         return amount
-
 
 
 ##############################################################################################################
@@ -323,39 +324,46 @@ class Game:
         """Validate and perform a repair action expressed as a CoordPair."""
         src_unit = self.get(coords.src)
         dst_unit = self.get(coords.dst)
+
         if src_unit is None or dst_unit is None:
             return (False, "Invalid units for repair")
         if src_unit.player != self.next_player or dst_unit.player != self.next_player:
             return (False, "Cannot repair enemy units")
-        if not src_unit.type == UnitType.Repair:
-            return (False, "Invalid repair source unit")
-        if src_unit.health >= 9:
-            return (False, "Source unit's health is already full")
-        # Calculate the repair amount
+        if dst_unit.health >= 9:
+            return (False, "Unit's health is already full")
+
         repair_amount = src_unit.repair_amount(dst_unit)
+        if repair_amount == 0:
+            return False, 'Repair Action cannot be performed. No healing abilities'
         # Apply repair
-        src_unit.mod_health(repair_amount)
         dst_unit.mod_health(repair_amount)
-        return (True, f"Repaired units: {coords.src} -> {coords.dst}")
+        return True, f"{src_unit} repaired {dst_unit} for {repair_amount}"
 
     def self_destruct(self, coord: Coord) -> Tuple[bool, str]:
         """Perform a self-destruct action at the specified Coord."""
         unit = self.get(coord)
         if unit is None:
             return (False, "No unit at the specified Coord.")
-        if unit.type != UnitType.SelfDestruct:
-            return (False, "Unit at the specified Coord cannot self-destruct.")
+        if unit.type == UnitType.AI:
+            return (False, "Cannot Destroy AI")
         # Damage surrounding units (including diagonals and friendly units)
+
         for adj_coord in coord.iter_range(1):
             target_unit = self.get(adj_coord)
             if target_unit is not None:
-                # Inflict 2 points of damage to the target unit
-                damage_amount = 2
-                target_unit.mod_health(-damage_amount)
+                target_unit.mod_health(-2)
+                if target_unit.health > 2 and target_unit.player == Player.Attacker:
+                    print(f'Attacking {target_unit.type.name} has lost 2 health points')
+                elif target_unit.health > 2 and target_unit.player == Player.Defender:
+                    print(f'Defending {target_unit.type.name} has lost 2 health points')
+                if target_unit.health <= 2 and target_unit.player == Player.Attacker:
+                    print(f'Attacking {target_unit.type.name} has been killed')
+                elif target_unit.health <= 2 and target_unit.player == Player.Defender:
+                    print(f'Defending {target_unit.type.name} has been killed')
                 self.remove_dead(adj_coord)
         # Remove the self-destruct unit from the board
         self.set(coord, None)
-        return (True, f"Self-destructed at {coord} and damaged surrounding units.")
+        return True, f"Self-destructed at {coord} and damaged surrounding units."
 
     def mod_health(self, coord: Coord, health_delta: int):
         """Modify health of unit at Coord (positive or negative delta)."""
@@ -368,10 +376,13 @@ class Game:
         self.mod_health(coords.src, -abs(targetUnit.damage_amount(unit)))
         self.mod_health(coords.dst, -abs(unit.damage_amount(targetUnit)))
         f = open('log.txt', "a")
-        f.write(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n {targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
+        f.write(
+            f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n {targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
         f.close()
-        print(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}')
-        print(f'{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}')
+        print(
+            f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}')
+        print(
+            f'{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}')
         if targetUnit.health <= 0:
             return True
         return False
@@ -396,8 +407,19 @@ class Game:
         row_diff = coords.dst.row - coords.src.row
         col_diff = coords.dst.col - coords.src.col
 
+        """Self-Destruct"""
+        if row_diff == 0 and col_diff == 0:
+            result = self.self_destruct(coords.src)
+            if result[0]:
+                return 'SD'
+            print(result[1])
+            return False
+
         """Ensure that no diagonal movements are allowed"""
-        if row_diff != 0 and col_diff != 0:
+        if row_diff == 1 and col_diff == 1:
+            return False
+        """Ensure that no diagonal movements are allowed"""
+        if row_diff == -1 and col_diff == -1:
             return False
 
         """Add movement restrictions based on player type and unit type"""
@@ -424,6 +446,20 @@ class Game:
                         return True
                     return 'Damage'
                 return False
+            elif dst_unit is not None and dst_unit.player == self.next_player:
+                reparable = self.perform_repair(coords)
+                if reparable[0]:
+                    f = open('log.txt', "a")
+                    f.write(reparable[1])
+                    f.close()
+                    print(reparable[1])
+                    return 'Repair'
+                print(reparable[1])
+                f = open('log.txt', "a")
+                f.write(reparable[1])
+                f.close()
+                return False
+
 
         """Check if the destination cell is empty or contains an opponent's unit"""
         return dst_unit is None or dst_unit.player != self.next_player
@@ -431,16 +467,25 @@ class Game:
     def perform_move(self, coords: CoordPair) -> Tuple[bool, str]:
         """Validate and perform a move expressed as a CoordPair."""
         result = self.is_valid_move(coords)
-        print(result)
         if result is True:
             self.set(coords.dst, self.get(coords.src))
             self.set(coords.src, None)
             return (True, "")
         elif result == "Damage":
+            f = open('log.txt', "a")
+            f.write('Combat has started\n')
+            f.close()
             return (True, "Damage")
-        f = open('log.txt', "a")
-        f.write('An Invalid Move Has Been Entered\n')
-        f.close()
+        elif result == "SD":
+            f = open('log.txt', "a")
+            f.write('Self-Destruct has been performed\n')
+            f.close()
+            return (True, "SD")
+        elif result == "Repair":
+            f = open('log.txt', "a")
+            f.write('Repair has been performed\n')
+            f.close()
+            return (True, "Repair")
         return (False, "invalid move")
 
     def next_turn(self):
@@ -654,37 +699,13 @@ class Game:
         return None
 
 
-    def self_destruct(self, coord: Coord) -> Tuple[bool, str]:
-        """Perform a self-destruct action at the specified Coord."""
-        unit = self.get(coord)
-
-        if unit is None:
-            return (False, "No unit at the specified Coord.")
-
-        if unit.type != UnitType.SelfDestruct:
-            return (False, "Unit at the specified Coord cannot self-destruct.")
-
-        # Damage surrounding units (including diagonals and friendly units)
-        for adj_coord in coord.iter_range(1):
-            target_unit = self.get(adj_coord)
-            if target_unit is not None:
-                # Inflict 2 points of damage to the target unit
-                damage_amount = 2
-                target_unit.mod_health(-damage_amount)
-                self.remove_dead(adj_coord)
-
-        # Remove the self-destruct unit from the board
-        self.set(coord, None)
-
-        return (True, f"Self-destructed at {coord} and damaged surrounding units.")
-
 ##############################################################################################################
 
 
 def main():
     # If you want to append data to an existing file, use 'a' mode
     f = open('log.txt', "a")
-    f.write('START OF THE LOG!.\n')
+    f.write('START OF THE GAME!.\n')
     f.close()
     # Parse command line arguments
     parser = argparse.ArgumentParser(
@@ -721,6 +742,7 @@ def main():
     game = Game(options=options)
 
     # The main game loop
+    # the main game loop
     while True:
         print()
         print(game)
@@ -728,20 +750,7 @@ def main():
         if winner is not None:
             print(f"{winner.name} wins!")
             break
-
         if game.options.game_type == GameType.AttackerVsDefender:
-            action = input(f'{game.next_player.name} Enter your action (play/repair/self-destruct):')
-            if action == "repair":
-                coords = game.read_move()
-                success, result = game.perform_repair(coords)
-                if success:
-                    print(f"Player {game.next_player.name}: {result}")
-            elif action == "self-destruct":
-                coords = game.read_move()
-                success, result = game.self_destruct(coords.src)
-                if success:
-                    game.human_turn()
-                    print(f"Player {game.next_player.name}: {result}")
             game.human_turn()
         elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
             game.human_turn()
@@ -757,5 +766,8 @@ def main():
                 exit(1)
 
 
-if __name__ == "__main__":
+##############################################################################################################
+
+
+if __name__ == '__main__':
     main()
