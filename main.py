@@ -590,6 +590,8 @@ class Game:
 
     def is_finished(self) -> bool:
         """Check if the game is over."""
+        if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
+            return True
         return self.has_winner() is not None
 
     def has_winner(self) -> Player | None:
@@ -740,6 +742,10 @@ def main():
 
     # Create a new game
     game = Game(options=options)
+
+    # Prompt the user for the maximum number of turns
+    max_turns = int(input("Enter the maximum number of turns: "))
+    game.options.max_turns = max_turns
 
     # The main game loop
     # the main game loop
