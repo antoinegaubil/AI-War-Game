@@ -601,7 +601,7 @@ class Game:
             f.write('DEFENDER WINS!.\n')
             f.close()
             return Player.Defender
-        elif self._attacker_has_ai:
+        if self._attacker_has_ai:
             if self._defender_has_ai:
                 return None
             else:
@@ -609,11 +609,7 @@ class Game:
                 f.write('ATTACKER WINS.\n')
                 f.close()
                 return Player.Attacker
-        elif self._defender_has_ai:
-            f = open('log.txt', "a")
-            f.write('DEFENDER WINS!.\n')
-            f.close()
-            return Player.Defender
+         return Player.Defender
 
     def move_candidates(self) -> Iterable[CoordPair]:
         """Generate valid move candidates for the next player."""
