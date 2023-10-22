@@ -8,10 +8,91 @@ from time import sleep
 from typing import Tuple, TypeVar, Type, Iterable, ClassVar
 import random
 import requests
+import math
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
 MIN_HEURISTIC_SCORE = -2000000000
+
+
+class AIPlayer:
+    def __init__(self, max_depth: int, max_time: float, heuristic_fn, use_alpha_beta=True):
+        self.max_depth = max_depth
+        self.max_time = max_time
+        self.heuristic_fn = heuristic_fn
+        self.use_alpha_beta = use_alpha_beta
+
+    def evaluate(self, game: Game, depth: int) -> int:
+        if depth == 0 or game.is_finished():
+            return self.heuristic_fn(game)
+
+        if game.next_player == Player.Attacker:
+            best_score = MIN_HEURISTIC_SCORE
+            for move in game.move_candidates():
+                new_game = game.clone()
+                new_game.perform_move(move)
+                score = self.evaluate(new_game, depth - 1)
+                best_score = max(best_score, score)
+        else:
+            best_score = MAX_HEURISTIC_SCORE
+            for move in game.move_candidates():
+                new_game = game.clone()
+                new_game.perform_move(move)
+                score = self.evaluate(new_game, depth - 1)
+                best_score = min(best_score, score)
+
+        return best_score
+
+    def choose_move(self, game: Game) -> CoordPair:
+        start_time = datetime.now()
+        best_move = None
+        best_score = MIN_HEURISTIC_SCORE
+
+        for move in game.move_candidates():
+            new_game = game.clone()
+            new_game.perform_move(move)
+
+            if self.use_alpha_beta:
+                score = self.alpha_beta(new_game, self.max_depth, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE)
+            else:
+                score = self.evaluate(new_game, self.max_depth)
+
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+            elapsed_time = (datetime.now() - start_time).total_seconds()
+            if self.max_time is not None and elapsed_time >= self.max_time:
+                break
+
+        return best_move
+
+    def alpha_beta(self, game: Game, depth: int, alpha: int, beta: int) -> int:
+        if depth == 0 or game.is_finished():
+            return self.heuristic_fn(game)
+
+        if game.next_player == Player.Attacker:
+            best_score = MIN_HEURISTIC_SCORE
+            for move in game.move_candidates():
+                new_game = game.clone()
+                new_game.perform_move(move)
+                score = self.alpha_beta(new_game, depth - 1, alpha, beta)
+                best_score = max(best_score, score)
+                alpha = max(alpha, score)
+                if beta <= alpha:
+                    break
+            return best_score
+        else:
+            best_score = MAX_HEURISTIC_SCORE
+            for move in game.move_candidates():
+                new_game = game.clone()
+                new_game.perform_move(move)
+                score = self.alpha_beta(new_game, depth - 1, alpha, beta)
+                best_score = min(best_score, score)
+                beta = min(beta, score)
+                if beta <= alpha:
+                    break
+            return best_score
 
 
 class UnitType(Enum):
@@ -58,8 +139,6 @@ def heuristic2(game: Game) -> int:
     ai_health = sum([unit.health for _, unit in game.player_units(Player.Attacker)])
     defender_health = sum([unit.health for _, unit in game.player_units(Player.Defender)])
     return ai_health - defender_health
-
-
 ##############################################################################################################
 
 
@@ -587,18 +666,13 @@ class Game:
 
     def computer_turn(self) -> CoordPair | None:
         """Computer plays a move."""
-        if self._attacker_has_ai and self.next_player == Player.Attacker:
-            self.make_ai_move(alpha_beta=True, heuristic=heuristic1)
-        elif self._defender_has_ai and self.next_player == Player.Defender:
-            self.make_ai_move(alpha_beta=True, heuristic=heuristic2)
-        else:
-            mv = self.suggest_move()
-            if mv is not None:
-                (success, result) = self.perform_move(mv)
-                if success:
-                    print(f"Computer {self.next_player.name}: ", end='')
-                    print(result)
-                    self.next_turn()
+        mv = self.suggest_move()
+        if mv is not None:
+            (success, result) = self.perform_move(mv)
+            if success:
+                print(f"Computer {self.next_player.name}: ", end='')
+                print(result)
+                self.next_turn()
         return mv
 
     def player_units(self, player: Player) -> Iterable[Tuple[Coord, Unit]]:
@@ -653,9 +727,9 @@ class Game:
             return (0, None, 0)
 
     def suggest_move(self) -> CoordPair | None:
-        """Suggest the next move using minimax alpha-beta."""
+        """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now()
-        (score, best_move) = self.select_best_move(3, alpha_beta=True, heuristic=heuristic1)
+        (score, move, avg_depth) = self.random_move()
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
         for k in sorted(self.stats.evaluations_per_depth.keys()):
@@ -665,7 +739,7 @@ class Game:
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals / self.stats.total_seconds / 1000:0.1f}k/s")
         print(f"Elapsed time: {elapsed_seconds:0.1f}s")
-        return best_move
+        return move
 
     def post_move_to_broker(self, move: CoordPair):
         """Send a move to the game broker."""
@@ -716,123 +790,15 @@ class Game:
             print(f"Broker error: {error}")
         return None
 
-    # Implement the minimax algorithm with alpha-beta pruning here
-    def minimax(self, depth: int, max_player: bool, alpha: int, beta: int, heuristic: callable) -> Tuple[
-        int, CoordPair | None]:
-        if depth == 0 or self.is_finished():
-            return heuristic(self), None
-
-        best_move = None
-        if max_player:
-            max_eval = MIN_HEURISTIC_SCORE
-            for move in self.move_candidates():
-                _, result = self.perform_move(move)
-                if result == "Damage":
-                    eval, _ = self.minimax(depth, not max_player, alpha, beta, heuristic)
-                else:
-                    eval, _ = self.minimax(depth - 1, not max_player, alpha, beta, heuristic)
-
-                if eval > max_eval:
-                    max_eval = eval
-                    best_move = move
-
-                alpha = max(alpha, max_eval)
-                if beta <= alpha:
-                    break
-            return max_eval, best_move
-        else:
-            min_eval = MAX_HEURISTIC_SCORE
-            for move in self.move_candidates():
-                _, result = self.perform_move(move)
-                if result == "Damage":
-                    eval, _ = self.minimax(depth, not max_player, alpha, beta, heuristic)
-                else:
-                    eval, _ = self.minimax(depth - 1, not max_player, alpha, beta, heuristic)
-
-                if eval < min_eval:
-                    min_eval = eval
-                    best_move = move
-
-                beta = min(beta, min_eval)
-                if beta <= alpha:
-                    break
-            return min_eval, best_move
-
-    # Implement a function to select the best move for the AI player
-    def select_best_move(self, depth: int, alpha_beta: bool, heuristic: callable) -> CoordPair:
-        if self.next_player == Player.Attacker and self.options.max_depth is not None and self.options.max_depth > 0:
-            _, best_move = self.minimax(self.options.max_depth, True, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE,
-                                        heuristic)
-        elif self.next_player == Player.Defender and self.options.min_depth is not None and self.options.min_depth > 0:
-            _, best_move = self.minimax(self.options.min_depth, False, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE,
-                                        heuristic)
-        else:
-            best_move = self.random_move()
-        return best_move
-
-    # Implement a function for the AI player to make its move
-    def make_ai_move(self, alpha_beta: bool, heuristic: callable) -> None:
-        if self.is_finished():
-            return
-        if self.options.max_time is not None and self.options.max_time > 0:
-            start_time = datetime.now()
-            best_move = self.select_best_move(1, alpha_beta, heuristic)
-            end_time = datetime.now()
-            move_time = (end_time - start_time).total_seconds()
-            if move_time >= self.options.max_time:
-                return
-
-            depth = 2
-            while move_time < self.options.max_time:
-                start_time = datetime.now()
-                best_move = self.select_best_move(depth, alpha_beta, heuristic)
-                end_time = datetime.now()
-                move_time = (end_time - start_time).total_seconds()
-                depth += 1
-
-        _, _ = self.perform_move(best_move)
-
-        if self.options.game_type == GameType.AttackerVsComp or self.options.game_type == GameType.CompVsComp:
-            sleep(1)
-
-        return
-
-    # Modify the play_game function to include AI players
-    def play_game(self, alpha_beta: bool = True, heuristic1: callable = heuristic1,
-                  heuristic2: callable = heuristic2) -> str:
-        while not self.is_finished():
-            if self.next_player == Player.Attacker:
-                if self._attacker_has_ai:
-                    self.make_ai_move(alpha_beta, heuristic1)
-                else:
-                    move = self.read_move()
-                    if not self.is_valid_move(move):
-                        return "Invalid move."
-                    _, result = self.perform_move(move)
-            else:
-                if self._defender_has_ai:
-                    self.make_ai_move(alpha_beta, heuristic2)
-                else:
-                    move = self.read_move()
-                    if not self.is_valid_move(move):
-                        return "Invalid move."
-                    _, result = self.perform_move(move)
-        return "Finished"
-
 
 ##############################################################################################################
 
 
 def main():
-    print("Welcome to the AI WarGame!")
-
-    # Prompt the user to select the game type
-    while True:
-        game_type_input = input("Select the game type (auto|attacker|defender|manual): ").strip().lower()
-        if game_type_input in ["auto", "attacker", "defender", "manual"]:
-            break
-        else:
-            print("Invalid game type. Please choose from the provided options.")
+    # Get game options from the user
+    game_type = input("Choose game type (auto|attacker|defender|manual): ")
+    max_depth = int(input("Enter max_depth for AI: "))
+    max_time = float(input("Enter max_time for AI (in seconds): "))
 
     # If you want to append data to an existing file, use 'a' mode
     f = open('log.txt', "a")
@@ -844,11 +810,11 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--max_depth', type=int, help='maximum search depth')
     parser.add_argument('--max_time', type=float, help='maximum search time')
-    parser.add_argument('--game_type', type=str, default="manual", help='game type: auto|attacker|defender|manual')
+    parser.add_argument('--game_type', type=str, default="attacker", help='game type: auto|attacker|defender|manual')
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
 
-    args.game_type = game_type_input
+    args.game_type = game_type
 
     # Parse the game type
     if args.game_type == "attacker":
@@ -860,14 +826,8 @@ def main():
     else:
         game_type = GameType.CompVsComp
 
-    # Prompt the user for max depth and max time
-    max_depth = int(input("Enter the maximum search depth for the AI player: "))
-    max_time = float(input("Enter the maximum search time (in seconds) for the AI player: "))
-
     # Set up game options
     options = Options(game_type=game_type)
-    options.max_depth = max_depth
-    options.max_time = max_time
 
     # Override class defaults via command line options
     if args.max_depth is not None:
@@ -885,6 +845,10 @@ def main():
     game.options.max_turns = max_turns
 
     # The main game loop
+    # Create the AI player with heuristics and game options
+    ai_player = AIPlayer(max_depth, max_time, heuristic1, use_alpha_beta=True)
+
+    # The main game loop
     while True:
         print()
         print(game)
@@ -892,20 +856,33 @@ def main():
         if winner is not None:
             print(f"{winner.name} wins!")
             break
+
         if game.options.game_type == GameType.AttackerVsDefender:
-            game.human_turn()
-        elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
-            game.human_turn()
-        elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender:
-            game.human_turn()
+            if game.next_player == Player.Attacker:
+                game.human_turn()
+            else:
+                move = game.computer_turn()
+                if move is not None:
+                    game.post_move_to_broker(move)
+        elif game.options.game_type == GameType.AttackerVsComp:
+            if game.next_player == Player.Attacker:
+                game.human_turn()
+            else:
+                move = game.computer_turn()
+                if move is not None:
+                    game.post_move_to_broker(move)
+        elif game.options.game_type == GameType.CompVsDefender:
+            if game.next_player == Player.Defender:
+                game.human_turn()
+            else:
+                move = game.computer_turn()
+                if move is not None:
+                    game.post_move_to_broker(move)
         else:
-            player = game.next_player
+            # For CompVsComp, both players are AI
             move = game.computer_turn()
             if move is not None:
                 game.post_move_to_broker(move)
-            else:
-                print("Computer doesn't know what to do!!!")
-                exit(1)
 
 
 ##############################################################################################################
@@ -913,3 +890,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
