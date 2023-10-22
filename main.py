@@ -667,7 +667,6 @@ class Game:
     def computer_turn(self) -> CoordPair | None:
         """Computer plays a move."""
         mv = self.suggest_move()
-        print("THIS IS MV", mv)
         if mv is not None:
             (success, result) = self.perform_move(mv)
             if success:
@@ -709,7 +708,6 @@ class Game:
     def move_candidates(self) -> Iterable[CoordPair]:
         """Generate valid move candidates for the next player."""
         move = CoordPair()
-        print('move', move)
         for (src, _) in self.player_units(self.next_player):
             move.src = src
             for dst in src.iter_adjacent():
@@ -722,7 +720,6 @@ class Game:
     def random_move(self) -> Tuple[int, CoordPair | None, float]:
         """Returns a random move."""
         move_candidates = list(self.move_candidates())
-        print(move_candidates)
         random.shuffle(move_candidates)
         if len(move_candidates) > 0:
             return (0, move_candidates[0], 1)
@@ -733,9 +730,7 @@ class Game:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now()
         (score, move, avg_depth) = self.random_move()
-        print("RANDO MOVE", move)
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
-        print("total seconds", elapsed_seconds)
         self.stats.total_seconds += elapsed_seconds
         for k in sorted(self.stats.evaluations_per_depth.keys()):
             print(f"{k}:{self.stats.evaluations_per_depth[k]} ", end='')
@@ -743,7 +738,7 @@ class Game:
         total_evals = sum(self.stats.evaluations_per_depth.values())
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals / self.stats.total_seconds / 1000:0.1f}k/s")
-        print(f"Elapsed tFime: {elapsed_seconds:0.1f}s")
+        print(f"Elapsed time: {elapsed_seconds:0.1f}s")
         return move
 
     def post_move_to_broker(self, move: CoordPair):
@@ -874,7 +869,6 @@ def main():
                 game.human_turn()
             else:
                 move = game.computer_turn()
-                print("HERE", move)
                 if move is not None:
                     game.post_move_to_broker(move)
         elif game.options.game_type == GameType.CompVsDefender:
