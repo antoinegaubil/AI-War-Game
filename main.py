@@ -848,6 +848,8 @@ def main():
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
 
+    args.game_type = game_type_input
+
     # Parse the game type
     if args.game_type == "attacker":
         game_type = GameType.AttackerVsComp
@@ -890,22 +892,20 @@ def main():
         if winner is not None:
             print(f"{winner.name} wins!")
             break
-
-        # Check if it's the attacker's or defender's turn
-        if game.next_player == Player.Attacker:
-            if game.options.game_type == GameType.AttackerVsDefender or (
-                    game.options.game_type == GameType.Auto and not game._attacker_has_ai):
-                game.human_turn()
-            else:
-                # Call play_game for AI player
-                result = game.play_game(alpha_beta=True, heuristic1=heuristic1)
+        if game.options.game_type == GameType.AttackerVsDefender:
+            game.human_turn()
+        elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
+            game.human_turn()
+        elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender:
+            game.human_turn()
         else:
-            if game.options.game_type == GameType.AttackerVsDefender or (
-                    game.options.game_type == GameType.Auto and not game._defender_has_ai):
-                game.human_turn()
+            player = game.next_player
+            move = game.computer_turn()
+            if move is not None:
+                game.post_move_to_broker(move)
             else:
-                # Call play_game for AI player
-                result = game.play_game(alpha_beta=True, heuristic2=heuristic2)
+                print("Computer doesn't know what to do!!!")
+                exit(1)
 
 
 ##############################################################################################################
