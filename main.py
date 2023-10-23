@@ -815,8 +815,9 @@ def main():
     parser.add_argument('--game_type', type=str, default="manual", help='game type: auto|attacker|defender|manual')
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
-
     args.game_type = game_type
+    args.max_time = max_time
+    args.max_depth = max_depth
 
     # Parse the game type
     if args.game_type == "attacker":
