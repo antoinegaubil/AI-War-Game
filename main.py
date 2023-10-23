@@ -589,7 +589,6 @@ class Game:
             unit = self.get(coord)
             if unit is not None and unit.player == player:
                 yield (coord, unit)
-            print("PROBLEM")
 
     def is_finished(self) -> bool:
         """Check if the game is over."""
@@ -670,15 +669,17 @@ class Game:
         opponent_health_ai = [unit.health for coord, unit in self.player_units(player) if
                               unit.type == UnitType.AI]
 
-        print('here',opponent_health_ai[0])
-
-        if player == Player.Attacker:
-            heuri_value = (unit_health_ai[0] - opponent_health_ai[0]) * 3 + (numb_heuristic1 - numb_heuristic2) * 2 + (
-                    health_heuristic1 - health_heuristic2)
-        elif player == Player.Defender:
-            heuri_value = (opponent_health_ai[0] - unit_health_ai[0]) * 3 + (numb_heuristic2 - numb_heuristic1) * 2 + (
-                    health_heuristic2 - health_heuristic1)
+        if unit_health_ai and opponent_health_ai:
+            if player == Player.Attacker:
+                heuri_value = (unit_health_ai[0] - opponent_health_ai[0]) * 3 + (numb_heuristic1 - numb_heuristic2) * 2 + (
+                        health_heuristic1 - health_heuristic2)
+            elif player == Player.Defender:
+                heuri_value = (opponent_health_ai[0] - unit_health_ai[0]) * 3 + (numb_heuristic2 - numb_heuristic1) * 2 + (
+                        health_heuristic2 - health_heuristic1)
+            else:
+                heuri_value = 0
         else:
+            # Handle the case where one or both lists are empty by providing a default value.
             heuri_value = 0
 
         return heuri_value
