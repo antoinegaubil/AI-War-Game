@@ -16,7 +16,7 @@ from io import StringIO
 MAX_HEURISTIC_SCORE = 2000000000
 MIN_HEURISTIC_SCORE = -2000000000
 
-
+FILE_FLAG = True
 class UnitType(Enum):
     """Every unit type."""
     AI = 0
@@ -378,10 +378,11 @@ class Game:
     def combat(self, coords: CoordPair, unit: Unit, targetUnit: Unit) -> bool:
         self.mod_health(coords.src, -abs(targetUnit.damage_amount(unit)))
         self.mod_health(coords.dst, -abs(unit.damage_amount(targetUnit)))
-        f = open('log.txt', "a")
-        f.write(
-            f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n {targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
-        f.close()
+        if FILE_FLAG:
+            f = open('log.txt', "a")
+            f.write(
+                f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n {targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
+            f.close()
         print(
             f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}')
         print(
@@ -452,15 +453,17 @@ class Game:
             elif dst_unit is not None and dst_unit.player == self.next_player:
                 reparable = self.perform_repair(coords)
                 if reparable[0]:
-                    f = open('log.txt', "a")
-                    f.write(reparable[1])
-                    f.close()
+                    if FILE_FLAG:
+                        f = open('log.txt', "a")
+                        f.write(reparable[1])
+                        f.close()
                     print(reparable[1])
                     return 'Repair'
                 print(reparable[1])
-                f = open('log.txt', "a")
-                f.write(reparable[1])
-                f.close()
+                if FILE_FLAG:
+                    f = open('log.txt', "a")
+                    f.write(reparable[1])
+                    f.close()
                 return False
 
         """Check if the destination cell is empty or contains an opponent's unit"""
@@ -474,19 +477,22 @@ class Game:
             self.set(coords.src, None)
             return (True, "")
         elif result == "Damage":
-            f = open('log.txt', "a")
-            f.write('Combat has started\n')
-            f.close()
+            if FILE_FLAG:
+                f = open('log.txt', "a")
+                f.write('Combat has started\n')
+                f.close()
             return (True, "Damage")
         elif result == "SD":
-            f = open('log.txt', "a")
-            f.write('Self-Destruct has been performed\n')
-            f.close()
+            if FILE_FLAG:
+                f = open('log.txt', "a")
+                f.write('Self-Destruct has been performed\n')
+                f.close()
             return (True, "SD")
         elif result == "Repair":
-            f = open('log.txt', "a")
-            f.write('Repair has been performed\n')
-            f.close()
+            if FILE_FLAG:
+                f = open('log.txt', "a")
+                f.write('Repair has been performed\n')
+                f.close()
             return (True, "Repair")
         return (False, "invalid move")
 
@@ -555,7 +561,7 @@ class Game:
                 if mv is not None:
                     (success, result) = self.perform_move(mv)
                     print(f"Broker {self.next_player.name}: ", end='')
-                    print(result)
+                    print('\n', result)
                     if success:
                         self.next_turn()
                         break
@@ -566,7 +572,7 @@ class Game:
                 (success, result) = self.perform_move(mv)
                 if success:
                     print(f"Player {self.next_player.name}: ", end='')
-                    print(result)
+                    print('\n', result)
                     self.next_turn()
                     break
                 else:
@@ -574,12 +580,21 @@ class Game:
 
     def computer_turn(self) -> CoordPair | None:
         """Computer plays a move."""
+        global FILE_FLAG
+        FILE_FLAG = False
         mv = self.suggest_move()
+        FILE_FLAG = True
         if mv is not None:
+            FILE_FLAG = False
             (success, result) = self.perform_move(mv)
+            FILE_FLAG = True
             if success:
+                self.perform_move(mv)
+                f = open('log.txt', "a")
+                f.write(f"Computer {self.next_player.name}: {mv}\n")
+                f.close()
                 print(f"Computer {self.next_player.name}: ", mv, end='',)
-                print(result)
+                print('\n', result)
                 self.next_turn()
         return mv
 
@@ -589,7 +604,6 @@ class Game:
             unit = self.get(coord)
             if unit is not None and unit.player == player:
                 yield (coord, unit)
-            print("PROBLEM")
 
     def is_finished(self) -> bool:
         """Check if the game is over."""
@@ -670,7 +684,6 @@ class Game:
         opponent_health_ai = [unit.health for coord, unit in self.player_units(player) if
                               unit.type == UnitType.AI]
 
-        print('here',opponent_health_ai[0])
 
         if player == Player.Attacker:
             heuri_value = (unit_health_ai[0] - opponent_health_ai[0]) * 3 + (numb_heuristic1 - numb_heuristic2) * 2 + (
@@ -850,6 +863,11 @@ def main():
     while True:
         print()
         print(game)
+        f = open('log.txt', "a")
+        f.write(str(game))
+        f.write('\n')
+        f.close()
+
         winner = game.has_winner()
         if winner is not None:
             print(f"{winner.name} wins!")
