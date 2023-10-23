@@ -1,6 +1,7 @@
 from __future__ import annotations
 import argparse
 import copy
+import os
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
@@ -8,91 +9,12 @@ from time import sleep
 from typing import Tuple, TypeVar, Type, Iterable, ClassVar
 import random
 import requests
-import math
+import sys
+from io import StringIO
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
 MIN_HEURISTIC_SCORE = -2000000000
-
-
-class AIPlayer:
-    def __init__(self, max_depth: int, max_time: float, heuristic_fn, use_alpha_beta=True):
-        self.max_depth = max_depth
-        self.max_time = max_time
-        self.heuristic_fn = heuristic_fn
-        self.use_alpha_beta = use_alpha_beta
-
-    def evaluate(self, game: Game, depth: int) -> int:
-        if depth == 0 or game.is_finished():
-            return self.heuristic_fn(game)
-
-        if game.next_player == Player.Attacker:
-            best_score = MIN_HEURISTIC_SCORE
-            for move in game.move_candidates():
-                new_game = game.clone()
-                new_game.perform_move(move)
-                score = self.evaluate(new_game, depth - 1)
-                best_score = max(best_score, score)
-        else:
-            best_score = MAX_HEURISTIC_SCORE
-            for move in game.move_candidates():
-                new_game = game.clone()
-                new_game.perform_move(move)
-                score = self.evaluate(new_game, depth - 1)
-                best_score = min(best_score, score)
-
-        return best_score
-
-    def choose_move(self, game: Game) -> CoordPair:
-        start_time = datetime.now()
-        best_move = None
-        best_score = MIN_HEURISTIC_SCORE
-
-        for move in game.move_candidates():
-            new_game = game.clone()
-            new_game.perform_move(move)
-
-            if self.use_alpha_beta:
-                score = self.alpha_beta(new_game, self.max_depth, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE)
-            else:
-                score = self.evaluate(new_game, self.max_depth)
-
-            if score > best_score:
-                best_score = score
-                best_move = move
-
-            elapsed_time = (datetime.now() - start_time).total_seconds()
-            if self.max_time is not None and elapsed_time >= self.max_time:
-                break
-
-        return best_move
-
-    def alpha_beta(self, game: Game, depth: int, alpha: int, beta: int) -> int:
-        if depth == 0 or game.is_finished():
-            return self.heuristic_fn(game)
-
-        if game.next_player == Player.Attacker:
-            best_score = MIN_HEURISTIC_SCORE
-            for move in game.move_candidates():
-                new_game = game.clone()
-                new_game.perform_move(move)
-                score = self.alpha_beta(new_game, depth - 1, alpha, beta)
-                best_score = max(best_score, score)
-                alpha = max(alpha, score)
-                if beta <= alpha:
-                    break
-            return best_score
-        else:
-            best_score = MAX_HEURISTIC_SCORE
-            for move in game.move_candidates():
-                new_game = game.clone()
-                new_game.perform_move(move)
-                score = self.alpha_beta(new_game, depth - 1, alpha, beta)
-                best_score = min(best_score, score)
-                beta = min(beta, score)
-                if beta <= alpha:
-                    break
-            return best_score
 
 
 class UnitType(Enum):
@@ -126,19 +48,6 @@ class GameType(Enum):
     CompVsComp = 3
 
 
-# Define your heuristics here
-def heuristic1(game: Game) -> int:
-    """A sample heuristic that considers the difference in the number of AI and Defender units."""
-    ai_units = len(list(game.player_units(Player.Attacker)))
-    defender_units = len(list(game.player_units(Player.Defender)))
-    return ai_units - defender_units
-
-
-def heuristic2(game: Game) -> int:
-    """A sample heuristic that considers the total health of AI units minus the total health of Defender units."""
-    ai_health = sum([unit.health for _, unit in game.player_units(Player.Attacker)])
-    defender_health = sum([unit.health for _, unit in game.player_units(Player.Defender)])
-    return ai_health - defender_health
 ##############################################################################################################
 
 
@@ -554,7 +463,6 @@ class Game:
                 f.close()
                 return False
 
-
         """Check if the destination cell is empty or contains an opponent's unit"""
         return dst_unit is None or dst_unit.player != self.next_player
 
@@ -670,7 +578,7 @@ class Game:
         if mv is not None:
             (success, result) = self.perform_move(mv)
             if success:
-                print(f"Computer {self.next_player.name}: ", end='')
+                print(f"Computer {self.next_player.name}: ", mv, end='',)
                 print(result)
                 self.next_turn()
         return mv
@@ -681,6 +589,7 @@ class Game:
             unit = self.get(coord)
             if unit is not None and unit.player == player:
                 yield (coord, unit)
+            print("PROBLEM")
 
     def is_finished(self) -> bool:
         """Check if the game is over."""
@@ -712,8 +621,11 @@ class Game:
             move.src = src
             for dst in src.iter_adjacent():
                 move.dst = dst
+                sys.stdout = open(os.devnull, 'w')
                 if self.is_valid_move(move):
                     yield move.clone()
+                    sys.stdout = sys.__stdout__
+                sys.stdout = sys.__stdout__
             move.dst = src
             yield move.clone()
 
@@ -726,19 +638,108 @@ class Game:
         else:
             return (0, None, 0)
 
+    def evaluate_board(self, player: Player) -> int:
+        """
+        Evaluate the board for the given player using heuristic functions.
+        """
+
+        # numb of player units
+        numb_heuristic1 = sum(
+            1 for coord, unit in self.player_units(player)
+        )
+
+        # numb of opponent units
+        numb_heuristic2 = sum(
+            1 for coord, unit in self.player_units(player.next())
+        )
+
+        # health of player units
+        health_heuristic1 = sum(
+            unit.health for coord, unit in self.player_units(player)
+        )
+
+        # health of opponent units
+        health_heuristic2 = sum(
+            unit.health for coord, unit in self.player_units(player.next())
+        )
+
+        # health of ally AI
+        unit_health_ai = [unit.health for coord, unit in self.player_units(player) if unit.type == UnitType.AI]
+
+        # health of opponent AI
+        opponent_health_ai = [unit.health for coord, unit in self.player_units(player) if
+                              unit.type == UnitType.AI]
+
+        print('here',opponent_health_ai[0])
+
+        if player == Player.Attacker:
+            heuri_value = (unit_health_ai[0] - opponent_health_ai[0]) * 3 + (numb_heuristic1 - numb_heuristic2) * 2 + (
+                    health_heuristic1 - health_heuristic2)
+        elif player == Player.Defender:
+            heuri_value = (opponent_health_ai[0] - unit_health_ai[0]) * 3 + (numb_heuristic2 - numb_heuristic1) * 2 + (
+                    health_heuristic2 - health_heuristic1)
+        else:
+            heuri_value = 0
+
+        return heuri_value
+
+    def minimax(self, depth, player, alpha, beta) -> Tuple[int, CoordPair | None]:
+        """
+        Perform the minimax search with alpha-beta pruning.
+        """
+        if depth == 0 or self.is_finished():
+            return self.evaluate_board(player), None
+
+        best_move = None
+
+        if player == Player.Attacker:
+            best_score = MIN_HEURISTIC_SCORE
+            for move in self.move_candidates():
+                new_game = self.clone()
+                sys.stdout = open(os.devnull, 'w')
+                result, message = new_game.perform_move(move)
+                sys.stdout = sys.__stdout__
+
+                score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta)
+
+                if result is True:
+                    if score > best_score:
+                        best_score = score
+                        best_move = move
+
+                    alpha = max(alpha, best_score)
+                    if beta <= alpha:
+                        break
+        else:
+            best_score = MAX_HEURISTIC_SCORE
+            for move in self.move_candidates():
+                new_game = self.clone()
+                sys.stdout = open(os.devnull, 'w')
+                result, message = new_game.perform_move(move)
+                sys.stdout = sys.__stdout__
+                score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta)
+
+                if result is True:
+                    if score < best_score:
+                        best_score = score
+                        best_move = move
+
+                        beta = min(beta, best_score)
+                        if beta <= alpha:
+                            break
+
+        return best_score, best_move
+
     def suggest_move(self) -> CoordPair | None:
-        """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
+        """
+        Suggest the next move using minimax alpha-beta pruning.
+        """
         start_time = datetime.now()
-        (score, move, avg_depth) = self.random_move()
+        _, move = self.minimax(self.options.max_depth, self.next_player, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE)
+        print("SCORE OF ", _)
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
-        for k in sorted(self.stats.evaluations_per_depth.keys()):
-            print(f"{k}:{self.stats.evaluations_per_depth[k]} ", end='')
-        print()
-        total_evals = sum(self.stats.evaluations_per_depth.values())
-        if self.stats.total_seconds > 0:
-            print(f"Eval perf.: {total_evals / self.stats.total_seconds / 1000:0.1f}k/s")
-        print(f"Elapsed time: {elapsed_seconds:0.1f}s")
+        print(elapsed_seconds)
         return move
 
     def post_move_to_broker(self, move: CoordPair):
@@ -808,9 +809,9 @@ def main():
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--max_depth', type=int, help='maximum search depth')
-    parser.add_argument('--max_time', type=float, help='maximum search time')
-    parser.add_argument('--game_type', type=str, default="attacker", help='game type: auto|attacker|defender|manual')
+    parser.add_argument('--max_depth', type=int, default="3", help='maximum search depth')
+    parser.add_argument('--max_time', type=float, default="300", help='maximum search time')
+    parser.add_argument('--game_type', type=str, default="manual", help='game type: auto|attacker|defender|manual')
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
 
@@ -845,10 +846,7 @@ def main():
     game.options.max_turns = max_turns
 
     # The main game loop
-    # Create the AI player with heuristics and game options
-    ai_player = AIPlayer(max_depth, max_time, heuristic1, use_alpha_beta=True)
-
-    # The main game loop
+    # the main game loop
     while True:
         print()
         print(game)
@@ -856,33 +854,20 @@ def main():
         if winner is not None:
             print(f"{winner.name} wins!")
             break
-
         if game.options.game_type == GameType.AttackerVsDefender:
-            if game.next_player == Player.Attacker:
-                game.human_turn()
-            else:
-                move = game.computer_turn()
-                if move is not None:
-                    game.post_move_to_broker(move)
-        elif game.options.game_type == GameType.AttackerVsComp:
-            if game.next_player == Player.Attacker:
-                game.human_turn()
-            else:
-                move = game.computer_turn()
-                if move is not None:
-                    game.post_move_to_broker(move)
-        elif game.options.game_type == GameType.CompVsDefender:
-            if game.next_player == Player.Defender:
-                game.human_turn()
-            else:
-                move = game.computer_turn()
-                if move is not None:
-                    game.post_move_to_broker(move)
+            game.human_turn()
+        elif game.options.game_type == GameType.AttackerVsComp and game.next_player == Player.Attacker:
+            game.human_turn()
+        elif game.options.game_type == GameType.CompVsDefender and game.next_player == Player.Defender:
+            game.human_turn()
         else:
-            # For CompVsComp, both players are AI
+            player = game.next_player
             move = game.computer_turn()
             if move is not None:
                 game.post_move_to_broker(move)
+            else:
+                print("Computer doesn't know what to do!!!")
+                exit(1)
 
 
 ##############################################################################################################
@@ -890,4 +875,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
