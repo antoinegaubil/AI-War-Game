@@ -17,6 +17,9 @@ MAX_HEURISTIC_SCORE = 2000000000
 MIN_HEURISTIC_SCORE = -2000000000
 
 FILE_FLAG = True
+
+START_TIME = datetime.now()
+TIME_HAS_STARTED = False
 class UnitType(Enum):
     """Every unit type."""
     AI = 0
@@ -253,6 +256,7 @@ class Stats:
     """Representation of the global game statistics."""
     evaluations_per_depth: dict[int, int] = field(default_factory=dict)
     total_seconds: float = 0.0
+    heuristics_count: int = 0
 
 
 ##############################################################################################################
@@ -356,12 +360,28 @@ class Game:
             if target_unit is not None:
                 target_unit.mod_health(-2)
                 if target_unit.health > 2 and target_unit.player == Player.Attacker:
+                    if FILE_FLAG:
+                        f = open('log.txt', "a")
+                        f.write(f'Attacking {target_unit.type.name} has lost 2 health points\n')
+                        f.close()
                     print(f'Attacking {target_unit.type.name} has lost 2 health points')
                 elif target_unit.health > 2 and target_unit.player == Player.Defender:
+                    if FILE_FLAG:
+                        f = open('log.txt', "a")
+                        f.write(f'Defending {target_unit.type.name} has lost 2 health points\n')
+                        f.close()
                     print(f'Defending {target_unit.type.name} has lost 2 health points')
                 if target_unit.health <= 2 and target_unit.player == Player.Attacker:
+                    if FILE_FLAG:
+                        f = open('log.txt', "a")
+                        f.write(f'Attacking {target_unit.type.name} has been killed\n')
+                        f.close()
                     print(f'Attacking {target_unit.type.name} has been killed')
                 elif target_unit.health <= 2 and target_unit.player == Player.Defender:
+                    if FILE_FLAG:
+                        f = open('log.txt', "a")
+                        f.write(f'Defending {target_unit.type.name} has been killed\n')
+                        f.close()
                     print(f'Defending {target_unit.type.name} has been killed')
                 self.remove_dead(adj_coord)
         # Remove the self-destruct unit from the board
@@ -380,8 +400,7 @@ class Game:
         self.mod_health(coords.dst, -abs(unit.damage_amount(targetUnit)))
         if FILE_FLAG:
             f = open('log.txt', "a")
-            f.write(
-                f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n {targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
+            f.write(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
             f.close()
         print(
             f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}')
@@ -489,10 +508,6 @@ class Game:
                 f.close()
             return (True, "SD")
         elif result == "Repair":
-            if FILE_FLAG:
-                f = open('log.txt', "a")
-                f.write('Repair has been performed\n')
-                f.close()
             return (True, "Repair")
         return (False, "invalid move")
 
@@ -581,6 +596,7 @@ class Game:
     def computer_turn(self) -> CoordPair | None:
         """Computer plays a move."""
         global FILE_FLAG
+        global TIME_HAS_STARTED
         FILE_FLAG = False
         mv = self.suggest_move()
         FILE_FLAG = True
@@ -589,14 +605,23 @@ class Game:
             (success, result) = self.perform_move(mv)
             FILE_FLAG = True
             if success:
-                self.perform_move(mv)
                 f = open('log.txt', "a")
                 f.write(f"Computer {self.next_player.name}: {mv}\n")
                 f.close()
                 print(f"Computer {self.next_player.name}: ", mv, end='',)
                 print('\n', result)
+                TIME_HAS_STARTED = False
                 self.next_turn()
+            else:
+                print(f"{self.next_player} looses! The action performed is not valid!")
+                f = open('log.txt', "a")
+                f.write(f"{self.next_player} looses! The action performed is not valid!")
+                f.close()
+                sys.exit()
         return mv
+
+    def get_heuristics_count(self):
+        return self.stats.heuristics_count
 
     def player_units(self, player: Player) -> Iterable[Tuple[Coord, Unit]]:
         """Iterates over all units belonging to a player."""
@@ -605,9 +630,26 @@ class Game:
             if unit is not None and unit.player == player:
                 yield (coord, unit)
 
+    def task_time(self):
+        return (datetime.now() - START_TIME).total_seconds()
+
+    def time_remaining(self):
+        return self.options.max_time - self.task_time()
+
     def is_finished(self) -> bool:
         """Check if the game is over."""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
+            return True
+        if self.options.max_time is not None and self.options.max_time <= self.task_time():
+            winner = self.has_winner()
+            if winner is not None:
+                print(f"{winner.name} wins!")
+                print(f'Total number of heuristic calculations : ', self.get_heuristics_count())
+                f = open('log.txt', "a")
+                f.write(f"{winner.name} wins!")
+                f.write(f'Total number of heuristic calculations : {self.get_heuristics_count()}')
+                f.close()
+                sys.exit()
             return True
         return self.has_winner() is not None
 
@@ -615,9 +657,20 @@ class Game:
         """Check if the game is over and returns winner"""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
             f = open('log.txt', "a")
-            f.write('DEFENDER WINS!.\n')
+            f.write('\nThe maximum number of turns has passed. \n\nGAME ENDING...\n\n')
             f.close()
+            print("\nThe maximum number of turns has passed. \nGAME ENDING... \n")
             return Player.Defender
+
+        if self.options.max_time is not None and TIME_HAS_STARTED is True and self.options.max_time <= self.task_time():
+            f = open('log.txt', "a")
+            f.write(f'\nThe maximum amount of time has passed. \n\nGAME ENDING...\n\n')
+            f.close()
+            print(f'\nThe maximum amount of time has passed. \nGAME ENDING... \n')
+            if self.next_player == Player.Attacker:
+                return Player.Defender
+            return Player.Attacker
+
         if self._attacker_has_ai:
             if self._defender_has_ai:
                 return None
@@ -652,11 +705,12 @@ class Game:
         else:
             return (0, None, 0)
 
-    def evaluate_board(self, player: Player) -> int:
+    def evaluate_board(self, player: Player, depth) -> int:
         """
         Evaluate the board for the given player using heuristic functions.
         """
 
+        self.stats.heuristics_count += 1
         # numb of player units
         numb_heuristic1 = sum(
             1 for coord, unit in self.player_units(player)
@@ -684,13 +738,21 @@ class Game:
         opponent_health_ai = [unit.health for coord, unit in self.player_units(player) if
                               unit.type == UnitType.AI]
 
+        if not unit_health_ai:
+            unit_health_ai.append(0)  # Add an element to the list
 
-        if player == Player.Attacker:
-            heuri_value = (unit_health_ai[0] - opponent_health_ai[0]) * 3 + (numb_heuristic1 - numb_heuristic2) * 2 + (
-                    health_heuristic1 - health_heuristic2)
-        elif player == Player.Defender:
-            heuri_value = (opponent_health_ai[0] - unit_health_ai[0]) * 3 + (numb_heuristic2 - numb_heuristic1) * 2 + (
-                    health_heuristic2 - health_heuristic1)
+        if not opponent_health_ai:
+            opponent_health_ai.append(0)  # Add an element to the list
+
+        if unit_health_ai and opponent_health_ai:
+            if player == Player.Attacker:
+                heuri_value = (unit_health_ai[0] - opponent_health_ai[0]) * 3 + (numb_heuristic1 - numb_heuristic2) * 2 + (
+                        health_heuristic1 - health_heuristic2)
+            elif player == Player.Defender:
+                heuri_value = (opponent_health_ai[0] - unit_health_ai[0]) * 3 + (numb_heuristic2 - numb_heuristic1) * 2 + (
+                        health_heuristic2 - health_heuristic1)
+            else:
+                heuri_value = 0
         else:
             heuri_value = 0
 
@@ -701,13 +763,18 @@ class Game:
         Perform the minimax search with alpha-beta pruning.
         """
         if depth == 0 or self.is_finished():
-            return self.evaluate_board(player), None
-
+            return self.evaluate_board(player, depth), None
         best_move = None
+
 
         if player == Player.Attacker:
             best_score = MIN_HEURISTIC_SCORE
             for move in self.move_candidates():
+
+                if self.time_remaining() < 2:
+                    print('ending MAX...', best_score, best_move)
+                    return best_score, best_move
+
                 new_game = self.clone()
                 sys.stdout = open(os.devnull, 'w')
                 result, message = new_game.perform_move(move)
@@ -726,6 +793,10 @@ class Game:
         else:
             best_score = MAX_HEURISTIC_SCORE
             for move in self.move_candidates():
+                if self.time_remaining() < 2:
+                    print('ending MAX...', best_score, best_move)
+                    return best_score, best_move
+
                 new_game = self.clone()
                 sys.stdout = open(os.devnull, 'w')
                 result, message = new_game.perform_move(move)
@@ -734,25 +805,31 @@ class Game:
 
                 if result is True:
                     if score < best_score:
+
                         best_score = score
                         best_move = move
 
                         beta = min(beta, best_score)
                         if beta <= alpha:
                             break
-
         return best_score, best_move
 
     def suggest_move(self) -> CoordPair | None:
         """
         Suggest the next move using minimax alpha-beta pruning.
         """
-        start_time = datetime.now()
+        global START_TIME
+        global TIME_HAS_STARTED
+        TIME_HAS_STARTED = True
+        START_TIME = datetime.now()
         _, move = self.minimax(self.options.max_depth, self.next_player, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE)
         print("SCORE OF ", _)
-        elapsed_seconds = (datetime.now() - start_time).total_seconds()
+        elapsed_seconds = self.task_time()
         self.stats.total_seconds += elapsed_seconds
-        print(elapsed_seconds)
+        f = open('log.txt', "a")
+        f.write(f'action performed in : {elapsed_seconds}seconds')
+        f.close()
+        print('action performed in :', elapsed_seconds)
         return move
 
     def post_move_to_broker(self, move: CoordPair):
@@ -816,7 +893,8 @@ def main():
 
     # If you want to append data to an existing file, use 'a' mode
     f = open('log.txt', "a")
-    f.write('START OF THE GAME!.\n')
+    f.write('START OF THE GAME!.\n\n')
+    f.write(f'Game Type: {game_type}\n\nDepth Of Search Tree : {max_depth}\n\nMaximum Time : {max_time}!\n\n\n')
     f.close()
     # Parse command line arguments
     parser = argparse.ArgumentParser(
@@ -827,8 +905,9 @@ def main():
     parser.add_argument('--game_type', type=str, default="manual", help='game type: auto|attacker|defender|manual')
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
-
     args.game_type = game_type
+    args.max_time = max_time
+    args.max_depth = max_depth
 
     # Parse the game type
     if args.game_type == "attacker":
@@ -870,7 +949,12 @@ def main():
 
         winner = game.has_winner()
         if winner is not None:
+            print(f'Total Heuristics Calculations:', game.get_heuristics_count())
             print(f"{winner.name} wins!")
+            f = open('log.txt', "a")
+            f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
+            f.write(f"{winner.name} wins!")
+            f.close()
             break
         if game.options.game_type == GameType.AttackerVsDefender:
             game.human_turn()
@@ -884,7 +968,12 @@ def main():
             if move is not None:
                 game.post_move_to_broker(move)
             else:
+                f = open('log.txt', "a")
+                f.write("Computer doesn't know what to do!!!")
+                f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
+                f.close()
                 print("Computer doesn't know what to do!!!")
+                print(f'Total Heuristics Calculations:', game.get_heuristics_count())
                 exit(1)
 
 
