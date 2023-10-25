@@ -20,6 +20,8 @@ FILE_FLAG = True
 
 START_TIME = datetime.now()
 TIME_HAS_STARTED = False
+
+TIME_ENDING_SOON = False
 class UnitType(Enum):
     """Every unit type."""
     AI = 0
@@ -643,10 +645,10 @@ class Game:
         if self.options.max_time is not None and self.options.max_time <= self.task_time():
             winner = self.has_winner()
             if winner is not None:
-                print(f"{winner.name} wins!")
+                print(f"{winner.name} wins in {self.turns_played}!")
                 print(f'Total number of heuristic calculations : ', self.get_heuristics_count())
                 f = open('log.txt', "a")
-                f.write(f"{winner.name} wins!")
+                f.write(f"{winner.name} wins in {self.turns_played}!")
                 f.write(f'Total number of heuristic calculations : {self.get_heuristics_count()}')
                 f.close()
                 sys.exit()
@@ -676,7 +678,7 @@ class Game:
                 return None
             else:
                 f = open('log.txt', "a")
-                f.write('ATTACKER WINS.\n')
+                f.write(f'ATTACKER WINS in {self.turns_played}.\n')
                 f.close()
                 return Player.Attacker
         return Player.Defender
@@ -716,6 +718,37 @@ class Game:
             1 for coord, unit in self.player_units(player)
         )
 
+        virus_attacker = sum(
+            1 for coord, unit in self.player_units(player) if unit.type == UnitType.Virus
+        )
+        tech_defender = sum(
+            1 for coord, unit in self.player_units(player.next()) if unit.type == UnitType.Tech
+        )
+
+        ai_attacker = sum(
+            1 for coord, unit in self.player_units(player) if unit.type == UnitType.AI
+        )
+
+        ai_defender = sum(
+            1 for coord, unit in self.player_units(player.next()) if unit.type == UnitType.AI
+        )
+
+        firewall_attacker = sum(
+            1 for coord, unit in self.player_units(player) if unit.type == UnitType.Firewall
+        )
+
+        firewall_defender = sum(
+            1 for coord, unit in self.player_units(player.next()) if unit.type == UnitType.Firewall
+        )
+
+        program_attacker = sum(
+            1 for coord, unit in self.player_units(player.next()) if unit.type == UnitType.Program
+        )
+
+        program_defender = sum(
+            1 for coord, unit in self.player_units(player.next()) if unit.type == UnitType.Program
+        )
+
         # numb of opponent units
         numb_heuristic2 = sum(
             1 for coord, unit in self.player_units(player.next())
@@ -746,35 +779,35 @@ class Game:
 
         if unit_health_ai and opponent_health_ai:
             if player == Player.Attacker:
-                heuri_value = (unit_health_ai[0] - opponent_health_ai[0]) * 3 + (numb_heuristic1 - numb_heuristic2) * 2 + (
+                e1 = (unit_health_ai[0] - opponent_health_ai[0]) * 10 + (numb_heuristic1 - numb_heuristic2) * 4 + (
                         health_heuristic1 - health_heuristic2)
+                e0 = (3*program_attacker + 3*firewall_attacker + 3*program_attacker + 999*ai_attacker)-(3*program_defender + 3*firewall_defender + 3*tech_defender + 999*ai_defender)
             elif player == Player.Defender:
-                heuri_value = (opponent_health_ai[0] - unit_health_ai[0]) * 3 + (numb_heuristic2 - numb_heuristic1) * 2 + (
+                e1 = (opponent_health_ai[0] - unit_health_ai[0]) * 10 + (numb_heuristic2 - numb_heuristic1) * 4 + (
                         health_heuristic2 - health_heuristic1)
+                e0 = (3 * program_defender + 3 * firewall_defender + 3 * tech_defender + 999 * ai_defender)-(3 * program_attacker + 3 * firewall_attacker + 3 * program_attacker + 999 * ai_attacker)
             else:
-                heuri_value = 0
+                e1 = 0
+                e0 = 0
         else:
-            heuri_value = 0
+            e1 = 0
+            e0 = 0
 
-        return heuri_value
+        return e1
 
     def minimax(self, depth, player, alpha, beta) -> Tuple[int, CoordPair | None]:
         """
         Perform the minimax search with alpha-beta pruning.
         """
+        global TIME_ENDING_SOON
+
         if depth == 0 or self.is_finished():
             return self.evaluate_board(player, depth), None
         best_move = None
 
-
         if player == Player.Attacker:
             best_score = MIN_HEURISTIC_SCORE
             for move in self.move_candidates():
-
-                if self.time_remaining() < 2:
-                    print('ending MAX...', best_score, best_move)
-                    return best_score, best_move
-
                 new_game = self.clone()
                 sys.stdout = open(os.devnull, 'w')
                 result, message = new_game.perform_move(move)
@@ -790,28 +823,31 @@ class Game:
                     alpha = max(alpha, best_score)
                     if beta <= alpha:
                         break
+                    if self.time_remaining() < 0.5:
+                        TIME_ENDING_SOON = True
+                        break
         else:
             best_score = MAX_HEURISTIC_SCORE
             for move in self.move_candidates():
-                if self.time_remaining() < 2:
-                    print('ending MAX...', best_score, best_move)
-                    return best_score, best_move
-
                 new_game = self.clone()
                 sys.stdout = open(os.devnull, 'w')
                 result, message = new_game.perform_move(move)
                 sys.stdout = sys.__stdout__
+
                 score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta)
 
                 if result is True:
                     if score < best_score:
-
                         best_score = score
                         best_move = move
 
                         beta = min(beta, best_score)
                         if beta <= alpha:
                             break
+
+                    if self.time_remaining() < 0.5:
+                        TIME_ENDING_SOON = True
+                        break
         return best_score, best_move
 
     def suggest_move(self) -> CoordPair | None:
@@ -820,16 +856,21 @@ class Game:
         """
         global START_TIME
         global TIME_HAS_STARTED
+        global TIME_ENDING_SOON
+
         TIME_HAS_STARTED = True
         START_TIME = datetime.now()
         _, move = self.minimax(self.options.max_depth, self.next_player, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE)
+        if TIME_ENDING_SOON:
+            print('\n\nQUICK, TIME IS RUNNING OUT...\n\n')
+            TIME_ENDING_SOON = False
         print("SCORE OF ", _)
         elapsed_seconds = self.task_time()
         self.stats.total_seconds += elapsed_seconds
         f = open('log.txt', "a")
-        f.write(f'action performed in : {elapsed_seconds}seconds')
+        f.write(f'action performed in : {elapsed_seconds} seconds')
         f.close()
-        print('action performed in :', elapsed_seconds)
+        print('action performed in :', elapsed_seconds, 'seconds')
         return move
 
     def post_move_to_broker(self, move: CoordPair):
@@ -950,10 +991,10 @@ def main():
         winner = game.has_winner()
         if winner is not None:
             print(f'Total Heuristics Calculations:', game.get_heuristics_count())
-            print(f"{winner.name} wins!")
+            print(f"{winner.name} wins in {game.turns_played}!")
             f = open('log.txt', "a")
             f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
-            f.write(f"{winner.name} wins!")
+            f.write(f"{winner.name} wins! in {game.turns_played}")
             f.close()
             break
         if game.options.game_type == GameType.AttackerVsDefender:
