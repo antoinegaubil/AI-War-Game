@@ -634,6 +634,65 @@ class Game:
             if unit is not None and unit.player == player:
                 yield (coord, unit)
 
+    def sum_of_positions(self, player: Player) -> int:
+        """Iterates over all units belonging to a player."""
+        sum_of_spaces = 0
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None and unit.player == player and unit.health != 0:
+                up = None
+                down = None
+                left = None
+                right = None
+
+                for i in range(4):
+                    coord_down = self.get(Coord(coord.row + (i + 1), coord.col))
+                    if coord_down is not None and coord_down.player == player and down is None:
+                        if coord.row+(i+1) > 4:
+                            down = 0
+                        else:
+                            down = i
+                        #print('down', coord, i, Coord(coord.row+(i+1), coord.col))
+                    if i == 3 and down is None:
+                        down = 0
+
+                for i in range(4):
+                    coord_up = self.get(Coord(coord.row - (i + 1), coord.col))
+                    if coord_up is not None and coord_up.player == player and up is None:
+                        if coord.row-(i+1) < 0:
+                            up = 0
+                        else:
+                            up = i
+                        #print('up', coord, i, Coord(coord.row-(i+1), coord.col))
+                    elif i == 3 and up is None:
+                        up = 0
+
+                for i in range(4):
+                    coord_right = self.get(Coord(coord.row, coord.col + (i + 1)))
+                    if coord_right is not None and coord_right.player == player and right is None:
+                        if coord.col+(i+1) > 4:
+                            right = 0
+                        else:
+                            right = i
+                        #print('right', coord, i, Coord(coord.row, coord.col+(i+1)))
+                    if i == 3 and right is None:
+                        right = 0
+
+                for i in range(4):
+                    coord_left = self.get(Coord(coord.row, coord.col - (i + 1)))
+                    if coord_left is not None and coord_left.player == player and left is None:
+                        if coord.col - (i + 1) < 0:
+                            left = 0
+                        else:
+                            left = i
+                        #print('left', coord, i, Coord(coord.row, coord.col-(i+1)))
+                    if i == 3 and left is None:
+                        left = 0
+                maxi = max(right, left, up, down)
+                sum_of_spaces += maxi
+        sum_of_spaces /= 2
+        return sum_of_spaces
+
     def task_time(self):
         return (datetime.now() - START_TIME).total_seconds()
 
@@ -713,8 +772,14 @@ class Game:
         """
         Evaluate the board for the given player using heuristic functions.
         """
-
         self.stats.heuristics_count += 1
+
+        #calculate the sum of spaces between allied units
+        ally_spacing_heuristic = self.sum_of_positions(player)
+
+        # calculate the sum of spaces between enemy units
+        enemy_spacing_heuristic = self.sum_of_positions(player.next())
+
         # numb of player units
         numb_heuristic1 = sum(
             1 for coord, unit in self.player_units(player)
@@ -773,6 +838,9 @@ class Game:
         opponent_health_ai = [unit.health for coord, unit in self.player_units(player) if
                               unit.type == UnitType.AI]
 
+        #sum of distances between attacking players
+
+
         if not unit_health_ai:
             unit_health_ai.append(0)  # Add an element to the list
 
@@ -783,19 +851,23 @@ class Game:
             if player == Player.Attacker:
                 e1 = (unit_health_ai[0] - opponent_health_ai[0]) * 10 + (numb_heuristic1 - numb_heuristic2) * 4 + (
                         health_heuristic1 - health_heuristic2)
-                e0 = (3*program_attacker + 3*firewall_attacker + 3*program_attacker + 999*ai_attacker)-(3*program_defender + 3*firewall_defender + 3*tech_defender + 999*ai_defender)
+                e0 = (3*virus_attacker + 3*firewall_attacker + 3*program_attacker + 999*ai_attacker)-(3*program_defender + 3*firewall_defender + 3*tech_defender + 999*ai_defender)
+                e2 = 2*e0 + ally_spacing_heuristic
             elif player == Player.Defender:
                 e1 = (opponent_health_ai[0] - unit_health_ai[0]) * 10 + (numb_heuristic2 - numb_heuristic1) * 4 + (
                         health_heuristic2 - health_heuristic1)
-                e0 = (3 * program_defender + 3 * firewall_defender + 3 * tech_defender + 999 * ai_defender)-(3 * program_attacker + 3 * firewall_attacker + 3 * program_attacker + 999 * ai_attacker)
+                e0 = (3 * program_defender + 3 * firewall_defender + 3 * tech_defender + 999 * ai_defender)-(3 * virus_attacker + 3 * firewall_attacker + 3 * program_attacker + 999 * ai_attacker)
+                e2 = 2*e0 - ally_spacing_heuristic
             else:
                 e1 = 0
                 e0 = 0
+                e2 = 0
         else:
             e1 = 0
             e0 = 0
+            e2 = 0
 
-        return e0
+        return e2
 
     def minimax(self, depth, player, alpha, beta) -> Tuple[int, CoordPair | None]:
         """
@@ -816,6 +888,7 @@ class Game:
                 sys.stdout = sys.__stdout__
 
                 score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta)
+                #print("MAX : ", score)
 
                 if result is True:
                     if score > best_score:
@@ -837,6 +910,7 @@ class Game:
                 sys.stdout = sys.__stdout__
 
                 score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta)
+                #print("MIN : ", score)
 
                 if result is True:
                     if score < best_score:
