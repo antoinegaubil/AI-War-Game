@@ -600,6 +600,8 @@ class Game:
         global FILE_FLAG
         global TIME_HAS_STARTED
         FILE_FLAG = False
+
+        print("🤖 BEEP BOOP, AI IS CALCULATING... 🧠\n")
         mv = self.suggest_move()
         FILE_FLAG = True
         if mv is not None:
@@ -793,7 +795,7 @@ class Game:
             e1 = 0
             e0 = 0
 
-        return e1
+        return e0
 
     def minimax(self, depth, player, alpha, beta) -> Tuple[int, CoordPair | None]:
         """
