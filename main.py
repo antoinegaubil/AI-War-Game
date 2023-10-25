@@ -17,7 +17,7 @@ use_alpha_beta = True
 max_time = 0
 max_turns = 0
 
-filename = f'gameTrace-{use_alpha_beta}-{max_time}-{max_turns}.txt'
+FILENAME = ''
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
@@ -370,25 +370,25 @@ class Game:
                 target_unit.mod_health(-2)
                 if target_unit.health > 2 and target_unit.player == Player.Attacker:
                     if FILE_FLAG:
-                        with open(filename, "a") as f:
+                        with open(FILENAME, "a") as f:
                             f.write(f'Attacking {target_unit.type.name} has lost 2 health points\n')
                             f.close()
                     print(f'Attacking {target_unit.type.name} has lost 2 health points')
                 elif target_unit.health > 2 and target_unit.player == Player.Defender:
                     if FILE_FLAG:
-                        with open(filename, "a") as f:
+                        with open(FILENAME, "a") as f:
                             f.write(f'Defending {target_unit.type.name} has lost 2 health points\n')
                             f.close()
                     print(f'Defending {target_unit.type.name} has lost 2 health points')
                 if target_unit.health <= 2 and target_unit.player == Player.Attacker:
                     if FILE_FLAG:
-                        with open(filename, "a") as f:
+                        with open(FILENAME, "a") as f:
                             f.write(f'Attacking {target_unit.type.name} has been killed\n')
                             f.close()
                     print(f'Attacking {target_unit.type.name} has been killed')
                 elif target_unit.health <= 2 and target_unit.player == Player.Defender:
                     if FILE_FLAG:
-                        with open(filename, "a") as f:
+                        with open(FILENAME, "a") as f:
                             f.write(f'Defending {target_unit.type.name} has been killed\n')
                             f.close()
                     print(f'Defending {target_unit.type.name} has been killed')
@@ -408,7 +408,7 @@ class Game:
         self.mod_health(coords.src, -abs(targetUnit.damage_amount(unit)))
         self.mod_health(coords.dst, -abs(unit.damage_amount(targetUnit)))
         if FILE_FLAG:
-            with open(filename, "a") as f:
+            with open(FILENAME, "a") as f:
                 f.write(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
                 f.close()
         print(
@@ -482,14 +482,14 @@ class Game:
                 reparable = self.perform_repair(coords)
                 if reparable[0]:
                     if FILE_FLAG:
-                        with open(filename, "a") as f:
+                        with open(FILENAME, "a") as f:
                             f.write(reparable[1])
                             f.close()
                     print(reparable[1])
                     return 'Repair'
                 print(reparable[1])
                 if FILE_FLAG:
-                    with open(filename, "a") as f:
+                    with open(FILENAME, "a") as f:
                         f.write(reparable[1])
                         f.close()
                 return False
@@ -506,13 +506,13 @@ class Game:
             return (True, "")
         elif result == "Damage":
             if FILE_FLAG:
-                with open(filename, "a") as f:
+                with open(FILENAME, "a") as f:
                     f.write('Combat has started\n')
                     f.close()
             return (True, "Damage")
         elif result == "SD":
             if FILE_FLAG:
-                with open(filename, "a") as f:
+                with open(FILENAME, "a") as f:
                     f.write('Self-Destruct has been performed\n')
                     f.close()
             return (True, "SD")
@@ -567,7 +567,7 @@ class Game:
         """Read a move from keyboard and return as a CoordPair."""
         while True:
             s = input(F'Player {self.next_player.name}, enter your move: ')
-            with open(filename, "a") as f:
+            with open(FILENAME, "a") as f:
                 f.write(F'{self.next_player.name}\'s move : {s} \n')
                 f.close()
             coords = CoordPair.from_string(s)
@@ -616,7 +616,7 @@ class Game:
             (success, result) = self.perform_move(mv)
             FILE_FLAG = True
             if success:
-                with open(filename, "a") as f:
+                with open(FILENAME, "a") as f:
                     f.write(f"Computer {self.next_player.name}: {mv}\n\n")
                     f.close()
                 print(f"Computer {self.next_player.name}: ", mv, end='',)
@@ -625,7 +625,7 @@ class Game:
                 self.next_turn()
             else:
                 print(f"{self.next_player} looses! The action performed is not valid!")
-                with open(filename, "a") as f:
+                with open(FILENAME, "a") as f:
                     f.write(f"{self.next_player} looses! The action performed is not valid!")
                     f.close()
                 sys.exit()
@@ -713,10 +713,10 @@ class Game:
         if self.options.max_time is not None and self.options.max_time <= self.task_time():
             winner = self.has_winner()
             if winner is not None:
-                print(f"{winner.name} wins in {self.turns_played}!")
+                print(f"\n{winner.name} wins in {self.turns_played}!")
                 print(f'Total number of heuristic calculations : ', self.get_heuristics_count())
-                with open(filename, "a") as f:
-                    f.write(f"{winner.name} wins in {self.turns_played}!")
+                with open(FILENAME, "a") as f:
+                    f.write(f"\n{winner.name} wins in {self.turns_played}!")
                     f.write(f'Total number of heuristic calculations : {self.get_heuristics_count()}')
                     f.close()
                 sys.exit()
@@ -726,14 +726,15 @@ class Game:
     def has_winner(self) -> Player | None:
         """Check if the game is over and returns winner"""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
-            with open(filename, "a") as f:
+            print(f'gameTrace-{use_alpha_beta}-{max_time}-{max_turns}.txt')
+            with open(FILENAME, "a") as f:
                 f.write('\nThe maximum number of turns has passed. \n\nGAME ENDING...\n\n')
                 f.close()
             print("\nThe maximum number of turns has passed. \nGAME ENDING... \n")
             return Player.Defender
 
         if self.options.max_time is not None and TIME_HAS_STARTED is True and self.options.max_time <= self.task_time():
-            with open(filename, "a") as f:
+            with open(FILENAME, "a") as f:
                 f.write(f'\nThe maximum amount of time has passed. \n\nGAME ENDING...\n\n')
                 f.close()
             print(f'\nThe maximum amount of time has passed. \nGAME ENDING... \n')
@@ -745,7 +746,7 @@ class Game:
             if self._defender_has_ai:
                 return None
             else:
-                with open(filename, "a") as f:
+                with open(FILENAME, "a") as f:
                     f.write(f'ATTACKER WINS in {self.turns_played}.\n')
                     f.close()
                 return Player.Attacker
@@ -950,7 +951,7 @@ class Game:
         print("Heuristic score: ", _)
         elapsed_seconds = self.task_time()
         self.stats.total_seconds += elapsed_seconds
-        with open(filename, "a") as f:
+        with open(FILENAME, "a") as f:
             f.write(f'Action performed in : {elapsed_seconds} seconds\nHeuristic score : {_} \n')
             f.close()
         print('Action performed in :', elapsed_seconds, ' seconds')
@@ -1018,9 +1019,10 @@ def main():
     use_alpha_beta = use_alpha_beta_input.lower() == "true"
     max_turns = int(input("Enter the maximum number of turns: "))
 
+    global FILENAME
     # If you want to append data to an existing file, use 'a' mode
-    filename = f'gameTrace-{use_alpha_beta}-{max_time}-{max_turns}.txt'
-    with open(filename, "a") as f:
+    FILENAME = f'gameTrace-{use_alpha_beta}-{max_time}-{max_turns}.txt'
+    with open(FILENAME, "a") as f:
         f.write('START OF THE GAME!.\n\n')
         f.write(f'Game Type: {game_type}\n\nDepth Of Search Tree : {max_depth}\n\nMaximum Time : {max_time}!\n\nMaximum turns : {max_turns}\n\nUse alpha beta : {use_alpha_beta}\n\n\n')
         f.close()
@@ -1067,7 +1069,7 @@ def main():
     while True:
         print()
         print(game)
-        with open(filename, "a") as f:
+        with open(FILENAME, "a") as f:
             f.write(str(game))
             f.write('\n')
             f.close()
@@ -1075,10 +1077,10 @@ def main():
         winner = game.has_winner()
         if winner is not None:
             print(f'Total Heuristics Calculations:', game.get_heuristics_count())
-            print(f"{winner.name} wins in {game.turns_played}!")
-            with open(filename, "a") as f:
+            print(f"\n{winner.name} wins in {game.turns_played}!")
+            with open(FILENAME, "a") as f:
                 f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
-                f.write(f"{winner.name} wins! in {game.turns_played}")
+                f.write(f"\n{winner.name} wins in {game.turns_played}!")
                 f.close()
             break
         if game.options.game_type == GameType.AttackerVsDefender:
@@ -1093,7 +1095,7 @@ def main():
             if move is not None:
                 game.post_move_to_broker(move)
             else:
-                with open(filename, "a") as f:
+                with open(FILENAME, "a") as f:
                     f.write("Computer doesn't know what to do!!!")
                     f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
                     f.close()
