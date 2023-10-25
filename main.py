@@ -12,6 +12,13 @@ import requests
 import sys
 from io import StringIO
 
+# Define the log file name based on the parameters
+use_alpha_beta = True
+max_time = 0
+max_turns = 0
+
+filename = f'gameTrace-{use_alpha_beta}-{max_time}-{max_turns}.txt'
+
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
 MIN_HEURISTIC_SCORE = -2000000000
@@ -363,27 +370,27 @@ class Game:
                 target_unit.mod_health(-2)
                 if target_unit.health > 2 and target_unit.player == Player.Attacker:
                     if FILE_FLAG:
-                        f = open('log.txt', "a")
-                        f.write(f'Attacking {target_unit.type.name} has lost 2 health points\n')
-                        f.close()
+                        with open(filename, "a") as f:
+                            f.write(f'Attacking {target_unit.type.name} has lost 2 health points\n')
+                            f.close()
                     print(f'Attacking {target_unit.type.name} has lost 2 health points')
                 elif target_unit.health > 2 and target_unit.player == Player.Defender:
                     if FILE_FLAG:
-                        f = open('log.txt', "a")
-                        f.write(f'Defending {target_unit.type.name} has lost 2 health points\n')
-                        f.close()
+                        with open(filename, "a") as f:
+                            f.write(f'Defending {target_unit.type.name} has lost 2 health points\n')
+                            f.close()
                     print(f'Defending {target_unit.type.name} has lost 2 health points')
                 if target_unit.health <= 2 and target_unit.player == Player.Attacker:
                     if FILE_FLAG:
-                        f = open('log.txt', "a")
-                        f.write(f'Attacking {target_unit.type.name} has been killed\n')
-                        f.close()
+                        with open(filename, "a") as f:
+                            f.write(f'Attacking {target_unit.type.name} has been killed\n')
+                            f.close()
                     print(f'Attacking {target_unit.type.name} has been killed')
                 elif target_unit.health <= 2 and target_unit.player == Player.Defender:
                     if FILE_FLAG:
-                        f = open('log.txt', "a")
-                        f.write(f'Defending {target_unit.type.name} has been killed\n')
-                        f.close()
+                        with open(filename, "a") as f:
+                            f.write(f'Defending {target_unit.type.name} has been killed\n')
+                            f.close()
                     print(f'Defending {target_unit.type.name} has been killed')
                 self.remove_dead(adj_coord)
         # Remove the self-destruct unit from the board
@@ -401,9 +408,9 @@ class Game:
         self.mod_health(coords.src, -abs(targetUnit.damage_amount(unit)))
         self.mod_health(coords.dst, -abs(unit.damage_amount(targetUnit)))
         if FILE_FLAG:
-            f = open('log.txt', "a")
-            f.write(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
-            f.close()
+            with open(filename, "a") as f:
+                f.write(f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}\n{targetUnit.player.name} DAMAGE {targetUnit.type.name} TO {unit.type.name}: {-abs(unit.damage_amount(targetUnit))}\n')
+                f.close()
         print(
             f'{unit.player.name} DAMAGE {unit.type.name} TO {targetUnit.type.name}: {-abs(targetUnit.damage_amount(unit))}')
         print(
@@ -475,16 +482,16 @@ class Game:
                 reparable = self.perform_repair(coords)
                 if reparable[0]:
                     if FILE_FLAG:
-                        f = open('log.txt', "a")
-                        f.write(reparable[1])
-                        f.close()
+                        with open(filename, "a") as f:
+                            f.write(reparable[1])
+                            f.close()
                     print(reparable[1])
                     return 'Repair'
                 print(reparable[1])
                 if FILE_FLAG:
-                    f = open('log.txt', "a")
-                    f.write(reparable[1])
-                    f.close()
+                    with open(filename, "a") as f:
+                        f.write(reparable[1])
+                        f.close()
                 return False
 
         """Check if the destination cell is empty or contains an opponent's unit"""
@@ -499,15 +506,15 @@ class Game:
             return (True, "")
         elif result == "Damage":
             if FILE_FLAG:
-                f = open('log.txt', "a")
-                f.write('Combat has started\n')
-                f.close()
+                with open(filename, "a") as f:
+                    f.write('Combat has started\n')
+                    f.close()
             return (True, "Damage")
         elif result == "SD":
             if FILE_FLAG:
-                f = open('log.txt', "a")
-                f.write('Self-Destruct has been performed\n')
-                f.close()
+                with open(filename, "a") as f:
+                    f.write('Self-Destruct has been performed\n')
+                    f.close()
             return (True, "SD")
         elif result == "Repair":
             return (True, "Repair")
@@ -560,9 +567,9 @@ class Game:
         """Read a move from keyboard and return as a CoordPair."""
         while True:
             s = input(F'Player {self.next_player.name}, enter your move: ')
-            f = open('log.txt', "a")
-            f.write(F'{self.next_player.name}\'s move : {s} \n')
-            f.close()
+            with open(filename, "a") as f:
+                f.write(F'{self.next_player.name}\'s move : {s} \n')
+                f.close()
             coords = CoordPair.from_string(s)
             if coords is not None and self.is_valid_coord(coords.src) and self.is_valid_coord(coords.dst):
                 return coords
@@ -595,32 +602,32 @@ class Game:
                 else:
                     print("The move is not valid! Try again.")
 
-    def computer_turn(self) -> CoordPair | None:
+    def computer_turn(self, use_alpha_beta) -> CoordPair | None:
         """Computer plays a move."""
         global FILE_FLAG
         global TIME_HAS_STARTED
         FILE_FLAG = False
 
         print("🤖 BEEP BOOP, AI IS CALCULATING... 🧠\n")
-        mv = self.suggest_move()
+        mv = self.suggest_move(use_alpha_beta)
         FILE_FLAG = True
         if mv is not None:
             FILE_FLAG = False
             (success, result) = self.perform_move(mv)
             FILE_FLAG = True
             if success:
-                f = open('log.txt', "a")
-                f.write(f"Computer {self.next_player.name}: {mv}\n")
-                f.close()
+                with open(filename, "a") as f:
+                    f.write(f"Computer {self.next_player.name}: {mv}\n\n")
+                    f.close()
                 print(f"Computer {self.next_player.name}: ", mv, end='',)
                 print('\n', result)
                 TIME_HAS_STARTED = False
                 self.next_turn()
             else:
                 print(f"{self.next_player} looses! The action performed is not valid!")
-                f = open('log.txt', "a")
-                f.write(f"{self.next_player} looses! The action performed is not valid!")
-                f.close()
+                with open(filename, "a") as f:
+                    f.write(f"{self.next_player} looses! The action performed is not valid!")
+                    f.close()
                 sys.exit()
         return mv
 
@@ -708,10 +715,10 @@ class Game:
             if winner is not None:
                 print(f"{winner.name} wins in {self.turns_played}!")
                 print(f'Total number of heuristic calculations : ', self.get_heuristics_count())
-                f = open('log.txt', "a")
-                f.write(f"{winner.name} wins in {self.turns_played}!")
-                f.write(f'Total number of heuristic calculations : {self.get_heuristics_count()}')
-                f.close()
+                with open(filename, "a") as f:
+                    f.write(f"{winner.name} wins in {self.turns_played}!")
+                    f.write(f'Total number of heuristic calculations : {self.get_heuristics_count()}')
+                    f.close()
                 sys.exit()
             return True
         return self.has_winner() is not None
@@ -719,16 +726,16 @@ class Game:
     def has_winner(self) -> Player | None:
         """Check if the game is over and returns winner"""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
-            f = open('log.txt', "a")
-            f.write('\nThe maximum number of turns has passed. \n\nGAME ENDING...\n\n')
-            f.close()
+            with open(filename, "a") as f:
+                f.write('\nThe maximum number of turns has passed. \n\nGAME ENDING...\n\n')
+                f.close()
             print("\nThe maximum number of turns has passed. \nGAME ENDING... \n")
             return Player.Defender
 
         if self.options.max_time is not None and TIME_HAS_STARTED is True and self.options.max_time <= self.task_time():
-            f = open('log.txt', "a")
-            f.write(f'\nThe maximum amount of time has passed. \n\nGAME ENDING...\n\n')
-            f.close()
+            with open(filename, "a") as f:
+                f.write(f'\nThe maximum amount of time has passed. \n\nGAME ENDING...\n\n')
+                f.close()
             print(f'\nThe maximum amount of time has passed. \nGAME ENDING... \n')
             if self.next_player == Player.Attacker:
                 return Player.Defender
@@ -738,9 +745,9 @@ class Game:
             if self._defender_has_ai:
                 return None
             else:
-                f = open('log.txt', "a")
-                f.write(f'ATTACKER WINS in {self.turns_played}.\n')
-                f.close()
+                with open(filename, "a") as f:
+                    f.write(f'ATTACKER WINS in {self.turns_played}.\n')
+                    f.close()
                 return Player.Attacker
         return Player.Defender
 
@@ -869,7 +876,7 @@ class Game:
 
         return e2
 
-    def minimax(self, depth, player, alpha, beta) -> Tuple[int, CoordPair | None]:
+    def minimax(self, depth, player, alpha, beta, use_alpha_beta) -> Tuple[int, CoordPair | None]:
         """
         Perform the minimax search with alpha-beta pruning.
         """
@@ -887,7 +894,7 @@ class Game:
                 result, message = new_game.perform_move(move)
                 sys.stdout = sys.__stdout__
 
-                score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta)
+                score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta, use_alpha_beta)
                 #print("MAX : ", score)
 
                 if result is True:
@@ -896,7 +903,7 @@ class Game:
                         best_move = move
 
                     alpha = max(alpha, best_score)
-                    if beta <= alpha:
+                    if use_alpha_beta and beta <= alpha:
                         break
                     if self.time_remaining() < 0.5:
                         TIME_ENDING_SOON = True
@@ -909,7 +916,7 @@ class Game:
                 result, message = new_game.perform_move(move)
                 sys.stdout = sys.__stdout__
 
-                score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta)
+                score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta, use_alpha_beta)
                 #print("MIN : ", score)
 
                 if result is True:
@@ -918,7 +925,7 @@ class Game:
                         best_move = move
 
                         beta = min(beta, best_score)
-                        if beta <= alpha:
+                        if use_alpha_beta and beta <= alpha:
                             break
 
                     if self.time_remaining() < 0.5:
@@ -926,7 +933,7 @@ class Game:
                         break
         return best_score, best_move
 
-    def suggest_move(self) -> CoordPair | None:
+    def suggest_move(self, use_alpha_beta) -> CoordPair | None:
         """
         Suggest the next move using minimax alpha-beta pruning.
         """
@@ -936,17 +943,17 @@ class Game:
 
         TIME_HAS_STARTED = True
         START_TIME = datetime.now()
-        _, move = self.minimax(self.options.max_depth, self.next_player, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE)
+        _, move = self.minimax(self.options.max_depth, self.next_player, MIN_HEURISTIC_SCORE, MAX_HEURISTIC_SCORE, use_alpha_beta)
         if TIME_ENDING_SOON:
             print('\n\nQUICK, TIME IS RUNNING OUT...\n\n')
             TIME_ENDING_SOON = False
-        print("SCORE OF ", _)
+        print("Heuristic score: ", _)
         elapsed_seconds = self.task_time()
         self.stats.total_seconds += elapsed_seconds
-        f = open('log.txt', "a")
-        f.write(f'action performed in : {elapsed_seconds} seconds')
-        f.close()
-        print('action performed in :', elapsed_seconds, 'seconds')
+        with open(filename, "a") as f:
+            f.write(f'Action performed in : {elapsed_seconds} seconds\nHeuristic score : {_} \n')
+            f.close()
+        print('Action performed in :', elapsed_seconds, ' seconds')
         return move
 
     def post_move_to_broker(self, move: CoordPair):
@@ -1007,12 +1014,16 @@ def main():
     game_type = input("Choose game type (auto|attacker|defender|manual): ")
     max_depth = int(input("Enter max_depth for AI: "))
     max_time = float(input("Enter max_time for AI (in seconds): "))
+    use_alpha_beta_input = input("Use alpha beta (True/False): ")
+    use_alpha_beta = use_alpha_beta_input.lower() == "true"
+    max_turns = int(input("Enter the maximum number of turns: "))
 
     # If you want to append data to an existing file, use 'a' mode
-    f = open('log.txt', "a")
-    f.write('START OF THE GAME!.\n\n')
-    f.write(f'Game Type: {game_type}\n\nDepth Of Search Tree : {max_depth}\n\nMaximum Time : {max_time}!\n\n\n')
-    f.close()
+    filename = f'gameTrace-{use_alpha_beta}-{max_time}-{max_turns}.txt'
+    with open(filename, "a") as f:
+        f.write('START OF THE GAME!.\n\n')
+        f.write(f'Game Type: {game_type}\n\nDepth Of Search Tree : {max_depth}\n\nMaximum Time : {max_time}!\n\nMaximum turns : {max_turns}\n\nUse alpha beta : {use_alpha_beta}\n\n\n')
+        f.close()
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
@@ -1049,9 +1060,6 @@ def main():
 
     # Create a new game
     game = Game(options=options)
-
-    # Prompt the user for the maximum number of turns
-    max_turns = int(input("Enter the maximum number of turns: "))
     game.options.max_turns = max_turns
 
     # The main game loop
@@ -1059,19 +1067,19 @@ def main():
     while True:
         print()
         print(game)
-        f = open('log.txt', "a")
-        f.write(str(game))
-        f.write('\n')
-        f.close()
+        with open(filename, "a") as f:
+            f.write(str(game))
+            f.write('\n')
+            f.close()
 
         winner = game.has_winner()
         if winner is not None:
             print(f'Total Heuristics Calculations:', game.get_heuristics_count())
             print(f"{winner.name} wins in {game.turns_played}!")
-            f = open('log.txt', "a")
-            f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
-            f.write(f"{winner.name} wins! in {game.turns_played}")
-            f.close()
+            with open(filename, "a") as f:
+                f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
+                f.write(f"{winner.name} wins! in {game.turns_played}")
+                f.close()
             break
         if game.options.game_type == GameType.AttackerVsDefender:
             game.human_turn()
@@ -1081,14 +1089,14 @@ def main():
             game.human_turn()
         else:
             player = game.next_player
-            move = game.computer_turn()
+            move = game.computer_turn(use_alpha_beta)
             if move is not None:
                 game.post_move_to_broker(move)
             else:
-                f = open('log.txt', "a")
-                f.write("Computer doesn't know what to do!!!")
-                f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
-                f.close()
+                with open(filename, "a") as f:
+                    f.write("Computer doesn't know what to do!!!")
+                    f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
+                    f.close()
                 print("Computer doesn't know what to do!!!")
                 print(f'Total Heuristics Calculations:', game.get_heuristics_count())
                 exit(1)
