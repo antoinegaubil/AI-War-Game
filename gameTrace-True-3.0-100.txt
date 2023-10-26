@@ -1,0 +1,221 @@
+START OF THE GAME!.
+
+Game Type: 
+
+Depth Of Search Tree : 3
+
+Maximum Time : 3.0!
+
+Maximum turns : 100
+
+Use alpha beta : True
+
+
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.132029 seconds
+Heuristic score : -12.0 
+Computer Attacker: C4 B4
+
+Next player: Defender
+Turns played: 1
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .  aP9 
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.157035 seconds
+Heuristic score : 1.0 
+Computer Defender: A2 B2
+
+Next player: Attacker
+Turns played: 2
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9 dF9  .  aP9 
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.143033 seconds
+Heuristic score : -12.0 
+Computer Attacker: B4 A4
+
+Next player: Defender
+Turns played: 3
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .  aP9 
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.151034 seconds
+Heuristic score : 2.0 
+Computer Defender: A1 A2
+
+Next player: Attacker
+Turns played: 4
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .  aP9 
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.131029 seconds
+Heuristic score : -12.0 
+Computer Attacker: A4 A3
+
+Next player: Defender
+Turns played: 5
+
+    0   1   2   3   4  
+A: dA9  .  dT9 aP9  .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.13103 seconds
+Heuristic score : 2.0 
+Computer Defender: A0 A1
+
+Next player: Attacker
+Turns played: 6
+
+    0   1   2   3   4  
+A:  .  dA9 dT6 aP8  .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.13303 seconds
+Heuristic score : -12.0 
+Computer Attacker: A3 A2
+
+Next player: Defender
+Turns played: 7
+
+    0   1   2   3   4  
+A:  .  dA9 aP6  .   .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.086019 seconds
+Heuristic score : 6.0 
+Computer Defender: A1 A2
+
+Next player: Attacker
+Turns played: 8
+
+    0   1   2   3   4  
+A:  .   .  dA3  .   .  
+B: dT9 dP9 dF8  .   .  
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.082018 seconds
+Heuristic score : -12.0 
+Computer Attacker: D3 C3
+
+Next player: Defender
+Turns played: 9
+
+    0   1   2   3   4  
+A:  .   .  dA3  .   .  
+B: dT9 dP9 dF8  .   .  
+C: dF9  .   .  aF9  .  
+D:  .   .   .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.098021 seconds
+Heuristic score : 7.0 
+Computer Defender: A2 A3
+
+Next player: Attacker
+Turns played: 10
+
+    0   1   2   3   4  
+A:  .   .   .  dA3  .  
+B: dT9 dP9 dF8  .   .  
+C: dF9  .   .  aF9  .  
+D:  .   .   .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.057014 seconds
+Heuristic score : 1992.0 
+Computer Attacker: C3 B3
+
+Next player: Defender
+Turns played: 11
+
+    0   1   2   3   4  
+A:  .   .   .  dA3  .  
+B: dT9 dP9 dF8 aF9  .  
+C: dF9  .   .   .   .  
+D:  .   .   .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.076017 seconds
+Heuristic score : 1997.0 
+Computer Defender: B0 A0
+
+Next player: Attacker
+Turns played: 12
+
+    0   1   2   3   4  
+A: dT9  .   .  dA2  .  
+B:  .  dP9 dF7 aF7  .  
+C: dF9  .   .   .   .  
+D:  .   .   .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.018005 seconds
+Heuristic score : 1993.0 
+Computer Attacker: D4 C4
+
+Next player: Defender
+Turns played: 13
+
+    0   1   2   3   4  
+A: dT9  .   .  dA1  .  
+B:  .  dP9 dF6 aF5  .  
+C: dF9  .   .   .  aV9 
+D:  .   .   .   .   .  
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.017004 seconds
+Heuristic score : 1998.0 
+Computer Defender: A0 B0
+
+Next player: Attacker
+Turns played: 14
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B: dT9 dP9 dF5 aF3  .  
+C: dF9  .   .   .  aV9 
+D:  .   .   .   .   .  
+E:  .   .  aP9 aV9 aA9 
+
+Total Heuristics Calculations: 3778
+Attacker wins in 14!

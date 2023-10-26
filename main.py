@@ -746,9 +746,6 @@ class Game:
             if self._defender_has_ai:
                 return None
             else:
-                with open(FILENAME, "a") as f:
-                    f.write(f'ATTACKER WINS in {self.turns_played}.\n')
-                    f.close()
                 return Player.Attacker
         return Player.Defender
 
@@ -760,7 +757,7 @@ class Game:
             for dst in src.iter_adjacent():
                 move.dst = dst
                 sys.stdout = open(os.devnull, 'w')
-                if self.is_valid_move(move):
+                if self.clone().is_valid_move(move):
                     yield move.clone()
                     sys.stdout = sys.__stdout__
                 sys.stdout = sys.__stdout__
@@ -896,8 +893,6 @@ class Game:
                 sys.stdout = sys.__stdout__
 
                 score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta, use_alpha_beta)
-                #print("MAX : ", score)
-
                 if result is True:
                     if score > best_score:
                         best_score = score
@@ -918,7 +913,6 @@ class Game:
                 sys.stdout = sys.__stdout__
 
                 score, _ = new_game.minimax(depth - 1, player.next(), alpha, beta, use_alpha_beta)
-                #print("MIN : ", score)
 
                 if result is True:
                     if score < best_score:
@@ -1095,12 +1089,25 @@ def main():
             if move is not None:
                 game.post_move_to_broker(move)
             else:
+                if game.next_player == Player.Attacker:
+                    winner = Player.Defender
+                else:
+                    winner = Player.Attacker
+                with open(FILENAME, "a") as f:
+                    f.write(f'\nThe maximum amount of time has passed. \n\nGAME ENDING...\n\n')
+                    f.write(f"\n{winner.name} wins in {game.turns_played}!")
+                    f.close()
+                print(f'\nThe maximum amount of time has passed. \nGAME ENDING... \n')
+                print(f"\n{winner.name} wins in {game.turns_played}!")
+
+                """"
                 with open(FILENAME, "a") as f:
                     f.write("Computer doesn't know what to do!!!")
                     f.write(f'Total Heuristics Calculations: {game.get_heuristics_count()}')
                     f.close()
                 print("Computer doesn't know what to do!!!")
                 print(f'Total Heuristics Calculations:', game.get_heuristics_count())
+                """
                 exit(1)
 
 

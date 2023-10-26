@@ -1,0 +1,410 @@
+START OF THE GAME!.
+
+Game Type: auto
+
+Depth Of Search Tree : 4
+
+Maximum Time : 4.0!
+
+Maximum turns : 100
+
+Use alpha beta : True
+
+
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.966215 seconds
+Heuristic score : -15.0 
+Computer Attacker: C4 B4
+
+Next player: Defender
+Turns played: 1
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .  aP9 
+C: dF9  .   .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 2.089468 seconds
+Heuristic score : 4.0 
+Computer Defender: B1 C1
+
+Next player: Attacker
+Turns played: 2
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .  aP9 
+C: dF9 dP9  .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 1.171263 seconds
+Heuristic score : -14.0 
+Computer Attacker: B4 A4
+
+Next player: Defender
+Turns played: 3
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .  aP9 
+B: dT9  .   .   .   .  
+C: dF9 dP9  .   .   .  
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 2.397537 seconds
+Heuristic score : 3.0 
+Computer Defender: C1 D1
+
+Next player: Attacker
+Turns played: 4
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .  aP9 
+B: dT9  .   .   .   .  
+C: dF9  .   .   .   .  
+D:  .  dP9  .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.892199 seconds
+Heuristic score : -14.0 
+Computer Attacker: D3 C3
+
+Next player: Defender
+Turns played: 5
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .  aP9 
+B: dT9  .   .   .   .  
+C: dF9  .   .  aF9  .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 2.614586 seconds
+Heuristic score : 3.0 
+Computer Defender: A2 B2
+
+Next player: Attacker
+Turns played: 6
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .  aP9 
+B: dT9  .  dF9  .   .  
+C: dF9  .   .  aF9  .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 1.037232 seconds
+Heuristic score : -14.0 
+Computer Attacker: C3 B3
+
+Next player: Defender
+Turns played: 7
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .  aP9 
+B: dT9  .  dF9 aF9  .  
+C: dF9  .   .   .   .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 2.878645 seconds
+Heuristic score : 3.0 
+Computer Defender: B0 B0
+
+Next player: Attacker
+Turns played: 8
+
+    0   1   2   3   4  
+A: dA7 dT7  .   .  aP9 
+B:  .   .  dF8 aF8  .  
+C: dF7  .   .   .   .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.813181 seconds
+Heuristic score : -8.0 
+Computer Attacker: B3 B2
+
+Next player: Defender
+Turns played: 9
+
+    0   1   2   3   4  
+A: dA7 dT7  .   .  aP9 
+B:  .   .  dF6 aF6  .  
+C: dF7  .   .   .   .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 2.564574 seconds
+Heuristic score : 3.0 
+Computer Defender: A0 B0
+
+Next player: Attacker
+Turns played: 10
+
+    0   1   2   3   4  
+A:  .  dT8  .   .  aP9 
+B: dA9  .  dF5 aF5  .  
+C: dF7  .   .   .   .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.695155 seconds
+Heuristic score : -8.5 
+Computer Attacker: A4 A3
+
+Next player: Defender
+Turns played: 11
+
+    0   1   2   3   4  
+A:  .  dT8  .  aP9  .  
+B: dA9  .  dF4 aF4  .  
+C: dF7  .   .   .   .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 1.094245 seconds
+Heuristic score : -1.0 
+Computer Defender: A1 B1
+
+Next player: Attacker
+Turns played: 12
+
+    0   1   2   3   4  
+A:  .   .   .  aP9  .  
+B: dA9 dT8 dF3 aF3  .  
+C: dF7  .   .   .   .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 0.663149 seconds
+Heuristic score : -5.0 
+Computer Attacker: A3 A2
+
+Next player: Defender
+Turns played: 13
+
+    0   1   2   3   4  
+A:  .   .  aP9  .   .  
+B: dA9 dT8 dF2 aF2  .  
+C: dF7  .   .   .   .  
+D:  .  dP9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+
+Action performed in : 1.770397 seconds
+Heuristic score : -3.0 
+Computer Defender: D1 E1
+
+Next player: Attacker
+Turns played: 14
+
+    0   1   2   3   4  
+A:  .   .  aP8  .   .  
+B: dA9 dT9 dF3 aF1  .  
+C: dF7  .   .   .   .  
+D:  .   .   .   .  aV9 
+E:  .  dP9 aP9 aV9 aA9 
+
+Action performed in : 0.380085 seconds
+Heuristic score : -5.0 
+Computer Attacker: A2 B2
+
+Next player: Defender
+Turns played: 15
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B: dA9 dT9 aP6  .   .  
+C: dF7  .   .   .   .  
+D:  .   .   .   .  aV9 
+E:  .  dP6 aP6 aV9 aA9 
+
+Action performed in : 0.252057 seconds
+Heuristic score : 0.0 
+Computer Defender: B1 B2
+
+Next player: Attacker
+Turns played: 16
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B: dA9 dT3 aP4  .   .  
+C: dF7  .   .   .   .  
+D:  .   .   .   .  aV9 
+E:  .  dP3 aP3 aV9 aA9 
+
+Action performed in : 0.594133 seconds
+Heuristic score : -6.0 
+Computer Attacker: B2 B1
+
+Next player: Defender
+Turns played: 17
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B: dA9 aP3  .   .   .  
+C: dF7  .   .   .   .  
+D:  .   .   .   .  aV9 
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.035008 seconds
+Heuristic score : 0.0 
+Computer Defender: B0 B1
+
+Next player: Attacker
+Turns played: 18
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B:  .  dA6  .   .   .  
+C: dF7  .   .   .   .  
+D:  .   .   .   .  aV9 
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.184042 seconds
+Heuristic score : -6.0 
+Computer Attacker: D4 C4
+
+Next player: Defender
+Turns played: 19
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B:  .  dA6  .   .   .  
+C: dF7  .   .   .  aV9 
+D:  .   .   .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.041008 seconds
+Heuristic score : 0.0 
+Computer Defender: B1 C1
+
+Next player: Attacker
+Turns played: 20
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B:  .   .   .   .   .  
+C: dF7 dA6  .   .  aV9 
+D:  .   .   .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.240053 seconds
+Heuristic score : -6.0 
+Computer Attacker: C4 B4
+
+Next player: Defender
+Turns played: 21
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B:  .   .   .   .  aV9 
+C: dF7 dA6  .   .   .  
+D:  .   .   .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.034008 seconds
+Heuristic score : 0.0 
+Computer Defender: C0 D0
+
+Next player: Attacker
+Turns played: 22
+
+    0   1   2   3   4  
+A:  .   .   .   .   .  
+B:  .   .   .   .  aV9 
+C:  .  dA6  .   .   .  
+D: dF7  .   .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.233053 seconds
+Heuristic score : -6.0 
+Computer Attacker: B4 A4
+
+Next player: Defender
+Turns played: 23
+
+    0   1   2   3   4  
+A:  .   .   .   .  aV9 
+B:  .   .   .   .   .  
+C:  .  dA6  .   .   .  
+D: dF7  .   .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.035008 seconds
+Heuristic score : 0.0 
+Computer Defender: C1 D1
+
+Next player: Attacker
+Turns played: 24
+
+    0   1   2   3   4  
+A:  .   .   .   .  aV9 
+B:  .   .   .   .   .  
+C:  .   .   .   .   .  
+D: dF7 dA6  .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.219049 seconds
+Heuristic score : -6.0 
+Computer Attacker: A4 A3
+
+Next player: Defender
+Turns played: 25
+
+    0   1   2   3   4  
+A:  .   .   .  aV9  .  
+B:  .   .   .   .   .  
+C:  .   .   .   .   .  
+D: dF7 dA6  .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.009 seconds
+Heuristic score : -2000000000 
+Computer Defender: D0 D0
+
+Next player: Attacker
+Turns played: 26
+
+    0   1   2   3   4  
+A:  .   .   .  aV9  .  
+B:  .   .   .   .   .  
+C:  .   .   .   .   .  
+D:  .  dA4  .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.248056 seconds
+Heuristic score : 0.0 
+Computer Attacker: A3 A2
+
+Next player: Defender
+Turns played: 27
+
+    0   1   2   3   4  
+A:  .   .  aV9  .   .  
+B:  .   .   .   .   .  
+C:  .   .   .   .   .  
+D:  .  dA4  .   .   .  
+E:  .   .   .  aV9 aA9 
+
+Action performed in : 0.004001 seconds
+Heuristic score : 2000000000 
+
+The maximum amount of time has passed. 
+
+GAME ENDING...
+
+
+Attacker wins in 27!
