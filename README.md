@@ -8,7 +8,7 @@ Implemented within this project is the minimax algorithm, a pivotal component in
 ### Heuristics
 
 
-Three heuristics contribute to strategic decision-making in the AI War Game. The first, e0, calculates point differentials based on the number of units, assigning a high coefficient to the AI unit. The second, e1, focuses on unit health levels, addressing the limitations of e0. The third, e2, emphasizes a spatial approach, evaluating the proximity of allies in four directions for each unit. Units are encouraged to move strategically, and heuristics work synergistically to gather comprehensive information for decision-making. The goal is a balanced combination of e0, e1, and e2, with e2 influencing decisions in cases of similar heuristic scores without dominating the scoring system.
+Three heuristics contribute to strategic decision-making in the AI War Game. The first, e0, calculates point differentials based on the number of units, assigning different coefficients for each type of unit. The second, e1, focuses on unit health levels, addressing the limitations of e0. The third, e2, emphasizes a spatial approach, evaluating the proximity of allies in four directions for each unit. Units are encouraged to move strategically, and heuristics work synergistically to gather comprehensive information for decision-making. The goal is a balanced combination of e0, e1, and e2, with e2 influencing decisions in cases of similar heuristic scores without dominating the scoring system.
 
 ### User Inputs
 
