@@ -14,16 +14,20 @@ Three heuristics contribute to strategic decision-making in the AI War Game. The
 
 1. Game Mode Selection:
 
-Choose between "human vs human," "human vs AI," or "AI vs AI" to customize the gaming experience.
-Alpha-Beta Pruning:
+Choose between "human vs human," "human vs AI," or "AI vs AI".
 
-2. Toggle alpha-beta pruning on or off to influence the efficiency of the algorithm.
-Maximum Search Time:
+2. Alpha-Beta Pruning:
 
-3. Set a time limit for the algorithm's exploration, providing control over computational resources.
-Maximum Rounds per Game:
+Toggle alpha-beta pruning on or off to influence the efficiency of the algorithm.
 
-4. Define the maximum number of rounds in a single game, allowing for variability in gameplay duration.
-Depth of Search Tree:
+3. Maximum Search Time:
 
-5. Adjust the depth of the search tree to determine the algorithm's exploration depth and influence strategic decision-making.
+Set a time limit for the algorithm's exploration; control computational ressources.
+
+4. Maximum Rounds per Game:
+
+Define the maximum number of rounds in a single game.
+
+5. Depth of Search Tree:
+
+Adjust the depth of the search tree to determine the algorithm's exploration depth.
